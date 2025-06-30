@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Week 2 - Docker Deploy</title>
+    <link
+      rel="stylesheet"
+      href="https://bootswatch.com/5/darkly/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Montserrat", sans-serif;
+      }
+
+      pre {
+        background-color: #2c3e50;
+        color: #eae9e9;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .tab-content {
+        border: 1px solid #dee2e6;
+        border-top: 0;
+        padding: 1.5rem;
+        border-radius: 0 0 0.375rem 0.375rem;
+      }
+
+      .nav-pills .nav-link {
+        border-radius: 0.375rem 0.375rem 0 0;
+      }
+
+      .code-container {
+        position: relative;
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        border: none;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .code-container:hover .copy-btn {
+        opacity: 1;
+      }
+
+      .copy-btn:hover {
+        background: rgba(0, 0, 0, 0.9);
+      }
+
+      .copy-btn.copied {
+        background: #28a745;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">CCDC Container Workshop</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="week1.html">Week 1</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="week2.html"
+                >Week 2</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      <ul class="nav nav-pills nav-fill" id="week2Tab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="lecture-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#lecture-content"
+            type="button"
+            role="tab"
+            aria-controls="lecture-content"
+            aria-selected="true"
+          >
+            <i class="bi bi-easel-fill"></i> Lecture & Demo
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="lab-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#lab-content"
+            type="button"
+            role="tab"
+            aria-controls="lab-content"
+            aria-selected="false"
+          >
+            <i class="bi bi-terminal-fill"></i> Lab
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="homework-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#homework-content"
+            type="button"
+            role="tab"
+            aria-controls="homework-content"
+            aria-selected="false"
+          >
+            <i class="bi bi-pencil-square"></i> Homework
+          </button>
+        </li>
+      </ul>
+      <div class="tab-content" id="week2TabContent">
+        <div
+          class="tab-pane fade show active"
+          id="lecture-content"
+          role="tabpanel"
+          aria-labelledby="lecture-tab"
+        >
+          <h1>
+            <i class="bi bi-easel-fill"></i> Week 2: Docker Deploy - Lecture &
+            Demo
+          </h1>
+
+          <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-exclamation-triangle-fill"></i> Prerequisites
+              Check
+            </h4>
+            <p>
+              <strong
+                >Before starting this week's exercises, ensure you have the
+                following installed:</strong
+              >
+            </p>
+            <div class="row">
+              <div class="col-md-6">
+                <h5>Required Software:</h5>
+                <ul class="mb-0">
+                  <li><strong>Docker</strong> (assumed already installed)</li>
+                  <li><strong>Node.js 18+</strong> with npm</li>
+                  <li><strong>PostgreSQL client tools</strong> (psql)</li>
+                  <li>
+                    <strong>Make</strong> and <strong>build-essential</strong>
+                  </li>
+                  <li>
+                    <strong>curl</strong>, <strong>tmux</strong>,
+                    <strong>tree</strong>, and <strong>jq</strong> for testing
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <h5>Quick Install (Ubuntu/Debian):</h5>
+                <pre><code># Update package list
+sudo apt update && sudo apt dist-upgrade -y
+
+# Install Node.js 18 via NodeSource
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install development tools
+sudo apt install -y make build-essential
+
+# Install PostgreSQL client and utilities
+sudo apt install -y postgresql-client
+
+# Install testing utilities
+sudo apt install -y curl jq tmux tree
+
+# Clone the Week 2 repository
+git clone https://github.com/devurandom11/ccdc-container-workshop.git
+cd ccdc-container-workshop/week2/assets/lecture/
+
+# Verify installations
+node --version  # Should be 18.x or higher
+npm --version
+make --version
+psql --version</code></pre>
+              </div>
+            </div>
+            <p class="mt-3 mb-0">
+              <strong>Alternative:</strong> Use <strong>nvm</strong> (Node
+              Version Manager) for easier Node.js management:
+              <code>nvm install 18 && nvm use 18</code>
+            </p>
+          </div>
+
+          <h2>1. Full Stack Application Analysis</h2>
+          <p>
+            Before containerizing applications, we need to understand how they
+            work as host-based services. In CCDC competitions, you'll often
+            encounter legacy applications that need analysis before migration or
+            hardening. Let's examine a typical full stack application.
+          </p>
+
+          <h3>Application Architecture Overview</h3>
+          <p>
+            Our sample application demonstrates a common three-tier
+            architecture:
+          </p>
+          <ul>
+            <li>
+              <strong>Frontend:</strong> React client with Vite build system
+            </li>
+            <li><strong>Backend:</strong> Node.js Express API server</li>
+            <li><strong>Database:</strong> PostgreSQL for persistent data</li>
+          </ul>
+
+          <h3>Analyzing the Node.js API Backend</h3>
+          <p>
+            Let's start by understanding the backend service requirements and
+            dependencies.
+          </p>
+
+          <h4>Service Dependencies Analysis</h4>
+          <pre><code># package.json reveals critical information
+{
+  "name": "api-node",
+  "main": "src/index.js",
+  "dependencies": {
+    "express": "^4.18.2",    # Web framework
+    "morgan": "^1.10.0",     # Logging middleware
+    "pg": "^8.8.0"           # PostgreSQL client
+  },
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  }
+}</code></pre>
+
+          <p><strong>Key Analysis Points:</strong></p>
+          <ul>
+            <li>
+              <strong>Runtime:</strong> Node.js (requires specific version)
+            </li>
+            <li><strong>Database:</strong> PostgreSQL connection required</li>
+            <li>
+              <strong>Port:</strong> Configurable via PORT environment variable
+              (default: 3000)
+            </li>
+            <li><strong>Health Check:</strong> `/ping` endpoint available</li>
+          </ul>
+
+          <h4>Environment Configuration</h4>
+          <pre><code># Database connection handling in db.js
+databaseUrl = 
+  process.env.DATABASE_URL ||
+  fs.readFileSync(process.env.DATABASE_URL_FILE, 'utf8');
+
+const pool = new Pool({
+  connectionString: databaseUrl,
+});</code></pre>
+
+          <p><strong>Configuration Requirements:</strong></p>
+          <ul>
+            <li>
+              <code>DATABASE_URL</code> - Direct database connection string
+            </li>
+            <li>
+              <code>DATABASE_URL_FILE</code> - Path to file containing
+              connection string (Docker secrets pattern)
+            </li>
+            <li><code>PORT</code> - Service listening port (default: 3000)</li>
+          </ul>
+
+          <h3>Analyzing the React Frontend</h3>
+          <p>
+            The frontend requires build-time compilation and runtime serving
+            infrastructure.
+          </p>
+
+          <h4>Build Requirements</h4>
+          <pre><code># package.json build configuration
+{
+  "name": "client-react",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",      # Development server
+    "build": "vite build",     # Production build
+    "preview": "vite preview"  # Preview built assets
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "axios": "^1.2.3",           # API communication
+    "@tanstack/react-query": "^4.22.4"  # State management
+  }
+}</code></pre>
+
+          <h4>Nginx Reverse Proxy Configuration</h4>
+          <pre><code># nginx.conf - Production serving strategy
+server {
+  listen 8080;
+  resolver 127.0.0.11;  # Docker DNS resolver
+  
+  # Health check endpoint
+  location /ping {
+    return 200 "pong";
+  }
+  
+  # API proxy to backend service
+  location /api/node/ {
+    set $api_node_upstream http://api-node:3000/;
+    proxy_pass $api_node_upstream;
+  }
+  
+  # Static asset serving
+  location / {
+    root /usr/share/nginx/html;
+    try_files $uri $uri/ /index.html =404;
+  }
+}</code></pre>
+
+          <p><strong>CCDC Analysis Checklist:</strong></p>
+          <ol>
+            <li>
+              ✅ <strong>Dependencies identified</strong> - Node.js, PostgreSQL,
+              Nginx
+            </li>
+            <li>
+              ✅ <strong>Ports mapped</strong> - API: 3000, Frontend: 8080, DB:
+              5432
+            </li>
+            <li>
+              ✅ <strong>Environment variables documented</strong> -
+              DATABASE_URL, PORT
+            </li>
+            <li>
+              ✅ <strong>Health checks available</strong> - /ping endpoints for
+              monitoring
+            </li>
+            <li>
+              ✅ <strong>Service communication</strong> - Frontend → API via
+              proxy
+            </li>
+          </ol>
+
+          <hr />
+
+          <h2>2. Running the Application Locally</h2>
+          <p>
+            Before containerizing any application, it's crucial to understand
+            how it works as a traditional host-based service. This helps
+            identify dependencies, configuration requirements, and potential
+            issues during migration. Let's run our full stack application
+            locally to interact with it.
+          </p>
+
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-play-circle-fill"></i> Hands-On Exercise: Local
+              Application Deployment
+            </h4>
+            <p>
+              Follow these steps to run the complete application stack on your
+              local machine.
+            </p>
+          </div>
+
+          <h3>Step 1: Navigate to Application Directory</h3>
+          <pre><code># Navigate to the week2 lecture assets
+cd week2/assets/lecture/
+
+# Verify the application structure
+ls -la
+# You should see: api-node/ client-react/ Makefile</code></pre>
+
+          <h3>Step 2: Install Application Dependencies</h3>
+          <p>
+            Both the Node.js API and React frontend need their dependencies
+            installed before they can run.
+          </p>
+
+          <pre><code># Install API dependencies
+cd api-node
+npm install
+cd ..
+
+# Install React frontend dependencies  
+cd client-react
+npm install
+cd ..
+
+# Verify installations
+echo "API dependencies installed:"
+ls api-node/node_modules | wc -l
+
+echo "React dependencies installed:"
+ls client-react/node_modules | wc -l</code></pre>
+
+          <h3>Step 3: Start PostgreSQL Database</h3>
+          <p>
+            The API requires a PostgreSQL database. We'll use Docker to run
+            PostgreSQL while keeping the application code running natively.
+          </p>
+
+          <pre><code># Start PostgreSQL using the provided Makefile
+make run-postgres
+
+# Alternative manual command:
+# docker run -d \
+#   -e POSTGRES_PASSWORD=ccdc-password \
+#   -v pgdata:/var/lib/postgresql/data \
+#   -p 5432:5432 \
+#   postgres:15.1-alpine
+
+# Verify PostgreSQL is running
+docker ps | grep postgres
+
+# Test database connectivity
+sleep 5
+psql postgres://postgres:ccdc-password@localhost:5432/postgres -c "SELECT version();"</code></pre>
+
+          <h3>Step 4: Start the Node.js API Server</h3>
+          <p>
+            Open a new terminal window/tab and start the API server. This will
+            run in development mode with auto-reload capabilities.
+          </p>
+
+          <pre><code># In Terminal 1: Start the API server
+cd week2/assets/lecture/
+make run-api-node
+
+# Alternative manual command:
+# cd api-node
+# DATABASE_URL=postgres://postgres:ccdc-password@localhost:5432/postgres npm run dev
+
+# You should see output like:
+# [nodemon] starting `node src/index.js`
+# Example app listening on port 3000</code></pre>
+
+          <h3>Step 5: Test the API Endpoints</h3>
+          <p>
+            With the API running, let's test its endpoints to understand its
+            functionality.
+          </p>
+
+          <pre><code># In a new terminal: Test API health check
+curl http://localhost:3000/ping
+
+# Expected response: pong
+
+# Test the main API endpoint (returns database timestamp)
+curl http://localhost:3000/ | jq .
+
+# Expected response:
+# {
+#   "now": "2024-01-15T10:30:45.123Z",
+#   "api": "node"
+# }</code></pre>
+
+          <h3>Step 6: Start the React Frontend</h3>
+          <p>
+            Open another terminal window/tab and start the React development
+            server. This will build and serve the frontend with hot-reload
+            capabilities.
+          </p>
+
+          <pre><code># In Terminal 2: Start the React development server
+cd week2/assets/lecture/
+make run-client-react
+
+# Alternative manual command:
+# cd client-react
+# npm run dev
+
+# You should see output like:
+# ➜  Local:   http://localhost:5173/
+# ➜  Network: http://192.168.1.100:5173/</code></pre>
+
+          <h3>Step 7: Interact with the Complete Application</h3>
+          <p>
+            Now you can interact with the full stack application to understand
+            its behavior.
+          </p>
+
+          <h4>Frontend Access</h4>
+          <pre><code># Access the React frontend
+open http://localhost:5173
+# Or: curl http://localhost:5173</code></pre>
+
+          <h4>Test Frontend-to-API Communication</h4>
+          <pre><code># The React app should automatically fetch data from the API
+# Watch the API terminal for incoming requests
+
+# Test the proxy configuration manually
+curl http://localhost:5173/api/node/ | jq .
+
+# This should return the same response as the direct API call</code></pre>
+
+          <h4>Monitor Application Behavior</h4>
+          <pre><code># Watch API logs in Terminal 1
+# Watch React dev server logs in Terminal 2
+
+# Refresh the frontend page and observe:
+# 1. API receives GET requests
+# 2. Database queries are executed
+# 3. Responses are returned to the frontend
+# 4. React updates the displayed timestamp</code></pre>
+
+          <h3>Application Behavior Analysis</h3>
+          <p>
+            Now that the application is running, let's document what we've
+            learned:
+          </p>
+
+          <h4>Service Dependencies Confirmed</h4>
+          <ul>
+            <li>
+              ✅ <strong>PostgreSQL Database:</strong> Required for API
+              functionality
+            </li>
+            <li>
+              ✅ <strong>Node.js API:</strong> Serves backend logic on port 3000
+            </li>
+            <li>
+              ✅ <strong>React Frontend:</strong> Development server on port
+              5173
+            </li>
+            <li>
+              ✅ <strong>Proxy Configuration:</strong> Frontend proxies
+              /api/node/ to backend
+            </li>
+          </ul>
+
+          <h4>Runtime Requirements Identified</h4>
+          <ul>
+            <li>
+              <strong>Database Connection String:</strong>
+              postgres://postgres:ccdc-password@localhost:5432/postgres
+            </li>
+            <li>
+              <strong>API Port Configuration:</strong> PORT=3000 (configurable
+              via environment)
+            </li>
+            <li>
+              <strong>Frontend Build Process:</strong> Vite handles bundling and
+              serving
+            </li>
+            <li>
+              <strong>Inter-Service Communication:</strong> HTTP requests
+              between frontend and API
+            </li>
+          </ul>
+
+          <h4>Production Deployment Considerations</h4>
+          <ul>
+            <li>
+              <strong>Static Asset Serving:</strong> React needs nginx or
+              similar for production
+            </li>
+            <li>
+              <strong>Process Management:</strong> Services need proper
+              lifecycle management
+            </li>
+            <li>
+              <strong>Environment Configuration:</strong> Database URLs, ports,
+              secrets management
+            </li>
+            <li>
+              <strong>Health Monitoring:</strong> Both services provide /ping
+              endpoints
+            </li>
+          </ul>
+
+          <h3>Cleanup and Next Steps</h3>
+          <pre><code># When you're done testing, stop the services:
+# Ctrl+C in both terminal windows to stop the Node.js and React servers
+
+# Stop and remove the PostgreSQL container
+docker stop $(docker ps -q --filter ancestor=postgres:15.1-alpine)
+docker rm $(docker ps -aq --filter ancestor=postgres:15.1-alpine)
+
+# Optional: Remove the database volume
+# docker volume rm pgdata</code></pre>
+
+          <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-lightbulb-fill"></i> CCDC Migration Insight
+            </h4>
+            <p>
+              <strong>What we learned:</strong> By running the application
+              locally first, we've identified all the runtime dependencies,
+              configuration requirements, and service interactions. This
+              information is crucial for creating effective Dockerfiles and
+              deployment strategies.
+            </p>
+            <p class="mb-0">
+              <strong>Next step:</strong> Now that we understand how the
+              application works, we can containerize each component while
+              preserving the same functionality and configuration patterns.
+            </p>
+          </div>
+
+          <hr />
+
+          <h2>3. Dockerfile Fundamentals</h2>
+          <p>
+            Dockerfiles are the blueprint for creating container images.
+            Understanding Dockerfile syntax and best practices is essential for
+            secure, efficient containerization in CCDC environments.
+          </p>
+
+          <h3>Essential Dockerfile Instructions</h3>
+          <p>
+            Let's cover the core instructions you'll use in most
+            containerization scenarios.
+          </p>
+
+          <h4>Base Image Selection</h4>
+          <pre><code># FROM - Specifies the base image
+FROM node:18-alpine
+
+# Why alpine? Smaller attack surface, faster builds
+# node:18-alpine ~= 120MB vs node:18 ~= 350MB</code></pre>
+
+          <p><strong>Base Image Strategy:</strong></p>
+          <ul>
+            <li>
+              <strong>Official Images:</strong> Use verified publishers (node,
+              nginx, postgres)
+            </li>
+            <li>
+              <strong>Alpine Variants:</strong> Minimal Linux distribution for
+              security
+            </li>
+            <li>
+              <strong>Specific Tags:</strong> Pin to exact versions for
+              reproducibility
+            </li>
+            <li>
+              <strong>Security Scanning:</strong> Regularly update base images
+            </li>
+          </ul>
+
+          <h4>Working Directory and File Operations</h4>
+          <pre><code># WORKDIR - Sets working directory for subsequent instructions
+WORKDIR /app
+
+# COPY - Copies files from host to container
+COPY package*.json ./
+COPY src/ ./src/
+COPY healthcheck/ ./healthcheck/
+
+# ADD - Similar to COPY but supports URLs and auto-extraction
+# Generally prefer COPY for local files</code></pre>
+
+          <h4>Dependency Installation and Optimization</h4>
+          <pre><code># RUN - Executes commands in the container
+RUN npm ci --only=production \
+    && npm cache clean --force \
+    && rm -rf /tmp/*
+
+# Why 'npm ci'? Faster, reliable, reproducible installs
+# Cleanup in same layer to reduce image size</code></pre>
+
+          <h4>Runtime Configuration</h4>
+          <pre><code># ENV - Sets environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# EXPOSE - Documents port usage (doesn't publish)
+EXPOSE 3000
+
+# USER - Sets user for security (avoid root)
+USER node
+
+# CMD - Default command when container starts
+CMD ["node", "src/index.js"]
+
+# ENTRYPOINT - Command that cannot be overridden
+# ENTRYPOINT ["node"]
+# CMD ["src/index.js"]</code></pre>
+
+          <h3>Multi-Stage Builds for Optimization</h3>
+          <p>
+            Multi-stage builds allow you to separate build dependencies from
+            runtime, resulting in smaller, more secure production images.
+          </p>
+
+          <h4>React Build Example</h4>
+          <pre><code># Stage 1: Build stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: Production stage
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+
+          <p><strong>Multi-Stage Benefits:</strong></p>
+          <ul>
+            <li>
+              <strong>Size Reduction:</strong> Final image excludes build tools
+            </li>
+            <li><strong>Security:</strong> Removes development dependencies</li>
+            <li>
+              <strong>Clean Separation:</strong> Build vs runtime concerns
+            </li>
+            <li>
+              <strong>Faster Deployments:</strong> Smaller images transfer
+              faster
+            </li>
+          </ul>
+
+          <h3>Dockerfile Best Practices for CCDC</h3>
+
+          <h4>Security Considerations</h4>
+          <pre><code># ❌ BAD: Running as root
+FROM node:18-alpine
+COPY . /app
+CMD ["node", "/app/src/index.js"]
+
+# ✅ GOOD: Non-root user with proper permissions
+FROM node:18-alpine
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodeuser -u 1001
+WORKDIR /app
+COPY --chown=nodeuser:nodejs package*.json ./
+USER nodeuser
+RUN npm ci --only=production
+COPY --chown=nodeuser:nodejs . .
+CMD ["node", "src/index.js"]</code></pre>
+
+          <h4>Layer Optimization</h4>
+          <pre><code># ❌ BAD: Multiple RUN instructions create unnecessary layers
+RUN apt-get update
+RUN apt-get install -y curl
+RUN apt-get clean
+
+# ✅ GOOD: Combine related operations
+RUN apt-get update \
+    && apt-get install -y curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*</code></pre>
+
+          <h4>Build Context Optimization</h4>
+          <pre><code># .dockerignore - Exclude unnecessary files
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.nyc_output
+coverage
+.coverage
+.cache</code></pre>
+
+          <hr />
+
+          <h2>4. Hands-on Containerization Demo</h2>
+          <p>
+            Now let's containerize our full stack application step by step. This
+            demonstrates the complete process from analysis to deployment.
+          </p>
+
+          <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-info-circle-fill"></i> Quick Testing with Makefile
+            </h4>
+            <p>
+              Before containerizing, you can test the applications natively
+              using the provided Makefile:
+            </p>
+            <pre><code># Navigate to the lecture assets directory
+cd week2/assets/lecture/
+
+# Install dependencies for both applications
+cd api-node && npm install && cd ..
+cd client-react && npm install && cd ..
+
+# Start PostgreSQL in Docker (background)
+make run-postgres
+
+# In separate terminals, start the services:
+# Terminal 1: Start API server
+make run-api-node
+
+# Terminal 2: Start React development server  
+make run-client-react
+
+# Test the application at http://localhost:5173
+# API accessible at http://localhost:3000</code></pre>
+            <p class="mb-0">
+              <strong>Note:</strong> The Makefile provides a quick way to run
+              the application stack for testing before containerization. This
+              helps verify functionality and understand dependencies.
+            </p>
+          </div>
+
+          <h3>Step 1: Containerizing the Node.js API</h3>
+          <p>
+            We'll create a production-ready Dockerfile for the Express API
+            service.
+          </p>
+
+          <h4>Create the API Dockerfile</h4>
+          <pre><code># api-node/Dockerfile
+FROM node:18-alpine
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodeuser -u 1001
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Copy application code
+COPY --chown=nodeuser:nodejs src/ ./src/
+COPY --chown=nodeuser:nodejs healthcheck/ ./healthcheck/
+
+# Switch to non-root user
+USER nodeuser
+
+# Configure environment
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Expose port (documentation)
+EXPOSE 3000
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node healthcheck/healthcheck.js
+
+# Start the application
+CMD ["node", "src/index.js"]</code></pre>
+
+          <h4>Build and Test the API Container</h4>
+          <pre><code># Build the API image
+cd api-node
+docker build -t ccdc-api-node:latest .
+
+# Test build success
+docker images | grep ccdc-api-node
+
+# Run a quick test (without database)
+docker run --rm -p 3000:3000 -e DATABASE_URL="postgresql://test:test@localhost:5432/test" ccdc-api-node:latest</code></pre>
+
+          <h3>Step 2: Containerizing the React Frontend</h3>
+          <p>
+            The frontend requires a multi-stage build to separate build
+            dependencies from the production nginx server.
+          </p>
+
+          <h4>Create the Frontend Dockerfile</h4>
+          <pre><code># client-react/Dockerfile
+# Stage 1: Build React application
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build production assets
+RUN npm run build
+
+# Stage 2: Production nginx server
+FROM nginx:alpine
+
+# Copy built assets from build stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Create non-root user for nginx
+RUN addgroup -g 1001 -S nginx && \
+    adduser -S nginxuser -u 1001 && \
+    chown -R nginxuser:nginx /var/cache/nginx && \
+    chown -R nginxuser:nginx /var/log/nginx && \
+    chown -R nginxuser:nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginxuser:nginx /var/run/nginx.pid
+
+# Switch to non-root user
+USER nginxuser
+
+# Expose port
+EXPOSE 8080
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+
+          <h4>Build the Frontend Container</h4>
+          <pre><code># Build the frontend image
+cd client-react
+docker build -t ccdc-client-react:latest .
+
+# Test the build
+docker images | grep ccdc-client-react
+
+# Test static serving (before API integration)
+docker run --rm -p 8080:8080 ccdc-client-react:latest</code></pre>
+
+          <h3>Step 3: Complete Stack Deployment</h3>
+          <p>
+            Now we'll deploy the complete stack with proper networking and data
+            persistence.
+          </p>
+
+          <h4>Create Application Network and Volumes</h4>
+          <pre><code># Create dedicated network for our application
+docker network create ccdc-fullstack-net
+
+# Create volume for PostgreSQL data
+docker volume create postgres-data
+
+# Verify network and volume creation
+docker network ls | grep ccdc-fullstack
+docker volume ls | grep postgres-data</code></pre>
+
+          <h4>Deploy PostgreSQL Database</h4>
+          <pre><code># Deploy PostgreSQL container
+docker run -d \
+  --name postgres-db \
+  --network ccdc-fullstack-net \
+  -v postgres-data:/var/lib/postgresql/data \
+  -e POSTGRES_DB=webapp \
+  -e POSTGRES_USER=dbuser \
+  -e POSTGRES_PASSWORD=secure-db-password-2024 \
+  -p 5432:5432 \
+  postgres:15-alpine
+
+# Wait for database to initialize
+sleep 10
+
+# Verify database is running
+docker logs postgres-db | tail -5</code></pre>
+
+          <h4>Deploy the API Service</h4>
+          <pre><code># Deploy API container with database connection
+docker run -d \
+  --name api-node \
+  --network ccdc-fullstack-net \
+  -e DATABASE_URL="postgresql://dbuser:secure-db-password-2024@postgres-db:5432/webapp" \
+  -e PORT=3000 \
+  -p 3000:3000 \
+  ccdc-api-node:latest
+
+# Test API health
+sleep 5
+curl http://localhost:3000/ping
+curl http://localhost:3000/</code></pre>
+
+          <h4>Deploy the Frontend Service</h4>
+          <pre><code># Deploy frontend container
+docker run -d \
+  --name client-react \
+  --network ccdc-fullstack-net \
+  -p 8080:8080 \
+  ccdc-client-react:latest
+
+# Test frontend health
+curl http://localhost:8080/ping
+
+# Test full stack integration
+curl http://localhost:8080/api/node/</code></pre>
+
+          <h4>Verify Complete Stack Operation</h4>
+          <pre><code># Check all containers are running
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Test end-to-end functionality
+echo "Testing full stack integration..."
+curl -s http://localhost:8080/api/node/ | jq .
+
+# Check container logs for any issues
+docker logs api-node | tail -5
+docker logs client-react | tail -5
+docker logs postgres-db | tail -5</code></pre>
+
+          <h3>Migration Success Verification</h3>
+          <p>
+            Verify that our containerized application matches the original
+            functionality:
+          </p>
+
+          <ol>
+            <li>
+              ✅ <strong>Frontend Accessible:</strong> http://localhost:8080
+            </li>
+            <li>
+              ✅
+              <strong>API Responsive:</strong> http://localhost:8080/api/node/
+            </li>
+            <li>
+              ✅ <strong>Database Connected:</strong> Timestamp returned from DB
+            </li>
+            <li>
+              ✅ <strong>Health Checks:</strong> /ping endpoints operational
+            </li>
+            <li>
+              ✅ <strong>Container Security:</strong> Non-root users, minimal
+              attack surface
+            </li>
+            <li>
+              ✅ <strong>Data Persistence:</strong> Database data survives
+              container restarts
+            </li>
+          </ol>
+
+          <h3>CCDC Containerization Best Practices</h3>
+
+          <h4>Security Hardening Checklist</h4>
+          <ul>
+            <li>🔒 <strong>Non-root users</strong> in all containers</li>
+            <li>
+              🔒 <strong>Minimal base images</strong> (Alpine Linux preferred)
+            </li>
+            <li>
+              🔒 <strong>No secrets in images</strong> (use environment
+              variables)
+            </li>
+            <li>
+              🔒 <strong>Health checks implemented</strong> for monitoring
+            </li>
+            <li>
+              🔒 <strong>Network isolation</strong> with dedicated networks
+            </li>
+            <li>🔒 <strong>Read-only filesystems</strong> where possible</li>
+          </ul>
+
+          <h4>Operational Excellence</h4>
+          <ul>
+            <li>📊 <strong>Resource limits</strong> set for CPU and memory</li>
+            <li>
+              📊 <strong>Restart policies</strong> configured appropriately
+            </li>
+            <li>📊 <strong>Logging configured</strong> for troubleshooting</li>
+            <li>📊 <strong>Backup procedures</strong> for persistent data</li>
+            <li>📊 <strong>Rollback strategy</strong> documented and tested</li>
+          </ul>
+
+          <h4>Quick Migration Reference</h4>
+          <pre><code># Standard migration workflow
+1. docker network create [app-name]-net
+2. docker volume create [data-volume-name]
+3. docker build -t [app-name]:[version] .
+4. docker run -d --name [service] --network [app-name]-net [app-name]:[version]
+5. Test functionality and performance
+6. Update documentation and monitoring</code></pre>
+
+          <h4>Cleanup Commands</h4>
+          <pre><code># Clean up the demo environment
+docker stop client-react api-node postgres-db
+docker rm client-react api-node postgres-db
+docker network rm ccdc-fullstack-net
+docker volume rm postgres-data
+docker rmi ccdc-api-node:latest ccdc-client-react:latest</code></pre>
+
+          <p>
+            <strong>CCDC Competition Note:</strong> During competitions,
+            prioritize working solutions over perfect optimization.
+            Containerization can improve security and manageability, but
+            maintain service availability first. Document all changes for team
+            communication and scoring purposes.
+          </p>
+        </div>
+        <div
+          class="tab-pane fade"
+          id="lab-content"
+          role="tabpanel"
+          aria-labelledby="lab-tab"
+        >
+          <h1>
+            <i class="bi bi-terminal-fill"></i> Week 2: Docker Deploy - Guided
+            Lab
+          </h1>
+          <p>
+            <em>Lab content will be added here...</em>
+          </p>
+        </div>
+        <div
+          class="tab-pane fade"
+          id="homework-content"
+          role="tabpanel"
+          aria-labelledby="homework-tab"
+        >
+          <h1>
+            <i class="bi bi-pencil-square"></i> Week 2: Business Inject -
+            Migration Plan
+          </h1>
+          <p>
+            <em>Homework content will be added here...</em>
+          </p>
+        </div>
+      </div>
+      <footer class="py-4 mt-4 text-muted border-top">
+        <div class="text-center">
+          <p class="mb-0">CCDC Container Workshop</p>
+          Designed for Coastline College's CCDC Team by Mike Crawford
+          <code>@devurandom11</code>
+        </div>
+      </footer>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      // Add copy buttons to all code blocks
+      document.addEventListener("DOMContentLoaded", function () {
+        const codeBlocks = document.querySelectorAll(
+          "pre code, pre:not(:has(code))"
+        );
+
+        codeBlocks.forEach(function (codeBlock) {
+          const pre =
+            codeBlock.tagName === "PRE" ? codeBlock : codeBlock.parentElement;
+
+          // Wrap pre in container if not already wrapped
+          if (!pre.parentElement.classList.contains("code-container")) {
+            const container = document.createElement("div");
+            container.className = "code-container";
+            pre.parentElement.insertBefore(container, pre);
+            container.appendChild(pre);
+          }
+
+          // Create copy button
+          const copyBtn = document.createElement("button");
+          copyBtn.className = "copy-btn";
+          copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+          copyBtn.title = "Copy to clipboard";
+
+          // Add click handler
+          copyBtn.addEventListener("click", function () {
+            const textToCopy =
+              codeBlock.tagName === "CODE"
+                ? codeBlock.textContent
+                : codeBlock.textContent;
+
+            navigator.clipboard
+              .writeText(textToCopy)
+              .then(function () {
+                copyBtn.innerHTML = '<i class="bi bi-check"></i>';
+                copyBtn.classList.add("copied");
+                copyBtn.title = "Copied!";
+
+                setTimeout(function () {
+                  copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+                  copyBtn.classList.remove("copied");
+                  copyBtn.title = "Copy to clipboard";
+                }, 2000);
+              })
+              .catch(function (err) {
+                console.error("Could not copy text: ", err);
+                // Fallback for older browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+
+                copyBtn.innerHTML = '<i class="bi bi-check"></i>';
+                copyBtn.classList.add("copied");
+                copyBtn.title = "Copied!";
+
+                setTimeout(function () {
+                  copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+                  copyBtn.classList.remove("copied");
+                  copyBtn.title = "Copy to clipboard";
+                }, 2000);
+              });
+          });
+
+          // Add button to container
+          pre.parentElement.appendChild(copyBtn);
+        });
+      });
+    </script>
+  </body>
+</html>
