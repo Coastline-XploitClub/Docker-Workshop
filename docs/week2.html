@@ -846,6 +846,36 @@ make run-client-react
 # ➜  Local:   http://localhost:5173/
 # ➜  Network: http://192.168.1.100:5173/</code></pre>
 
+          <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading">🔍 Development vs Production Ports</h5>
+            <p><strong>Why different ports?</strong></p>
+            <ul class="mb-2">
+              <li>
+                <strong>Port 5173:</strong> Vite development server (what we're
+                running now)
+                <ul>
+                  <li>Hot module replacement for instant code changes</li>
+                  <li>Built-in proxy to API backend</li>
+                  <li>Development features and debugging tools</li>
+                </ul>
+              </li>
+              <li>
+                <strong>Port 8080:</strong> Production nginx server (for
+                containerized deployment)
+                <ul>
+                  <li>Serves pre-built static files (HTML, CSS, JS)</li>
+                  <li>Optimized for performance and security</li>
+                  <li>Reverse proxy configuration for API routing</li>
+                </ul>
+              </li>
+            </ul>
+            <p class="mb-0">
+              <strong>Key point:</strong> We're using development mode now to
+              understand the application. Later, when we containerize, we'll use
+              the production nginx approach on port 8080.
+            </p>
+          </div>
+
           <h3>Step 7: Interact with the Complete Application</h3>
           <p>
             Now you can interact with the full stack application to understand
@@ -953,16 +983,82 @@ Ctrl+b 4    # Return to testing window
             </li>
           </ul>
 
+          <h3>Step 8: Verify Database Activity (Testing Window)</h3>
+          <p>
+            Let's confirm that the PostgreSQL database is actively being used by
+            querying it directly. Every time you access the API (either directly
+            or through the React frontend), the application executes
+            <code>SELECT NOW() as now;</code> to get the current timestamp.
+          </p>
+
+          <pre><code># Switch to testing window
+Ctrl+b 4
+
+# Connect directly to the PostgreSQL database
+psql postgres://postgres:ccdc-password@localhost:5432/postgres
+
+# Once connected to psql, you can run these queries:
+
+# Check current database time (same as what the API calls)
+SELECT NOW() as current_time;
+
+# View active database connections
+SELECT pid, usename, application_name, client_addr, state, query_start 
+FROM pg_stat_activity 
+WHERE state = 'active' OR state = 'idle in transaction';
+
+# Check if pg_stat_statements extension is available
+SELECT * FROM pg_available_extensions WHERE name = 'pg_stat_statements';
+
+# If not available, check current database activity instead
+SELECT datname, numbackends, xact_commit, xact_rollback 
+FROM pg_stat_database 
+WHERE datname = 'postgres';
+
+# View current connections and their state
+SELECT count(*) as connection_count, state 
+FROM pg_stat_activity 
+GROUP BY state;
+
+# Exit psql
+\q</code></pre>
+
+          <div class="alert alert-success" role="alert">
+            <h5 class="alert-heading">✅ Database Integration Confirmed</h5>
+            <p><strong>What the API does:</strong></p>
+            <ul class="mb-2">
+              <li>
+                Every request to <code>http://localhost:3000/</code> triggers
+                <code>SELECT NOW()</code>
+              </li>
+              <li>
+                Every React frontend load executes this query automatically
+              </li>
+              <li>
+                The database timestamp is returned to show real-time
+                connectivity
+              </li>
+              <li>
+                Each query increments the <code>xact_commit</code> counter in
+                <code>pg_stat_database</code>
+              </li>
+            </ul>
+            <p class="mb-0">
+              <strong>Test it:</strong> Compare the transaction count before and
+              after making API calls to see the database activity!
+            </p>
+          </div>
+
           <h3>Cleanup and Next Steps</h3>
           <pre><code># When you're done testing, stop the services:
 # Ctrl+C in both terminal windows to stop the Node.js and React servers
 
 # Stop and remove the PostgreSQL container
-docker stop $(docker ps -q --filter ancestor=postgres:15.1-alpine)
-docker rm $(docker ps -aq --filter ancestor=postgres:15.1-alpine)
+docker stop $(docker ps -q -a)
+docker rm $(docker ps -aq -a)
 
-# Optional: Remove the database volume
-# docker volume rm pgdata</code></pre>
+# Remove the database volume
+docker volume rm pgdata</code></pre>
 
           <div class="alert alert-info" role="alert">
             <h4 class="alert-heading">
@@ -984,487 +1080,7 @@ docker rm $(docker ps -aq --filter ancestor=postgres:15.1-alpine)
 
           <hr />
 
-          <h2>3. Dockerfile Fundamentals</h2>
-          <p>
-            Dockerfiles are the blueprint for creating container images.
-            Understanding Dockerfile syntax and best practices is essential for
-            secure, efficient containerization in CCDC environments.
-          </p>
-
-          <h3>Essential Dockerfile Instructions</h3>
-          <p>
-            Let's cover the core instructions you'll use in most
-            containerization scenarios.
-          </p>
-
-          <h4>Base Image Selection</h4>
-          <pre><code># FROM - Specifies the base image
-FROM node:18-alpine
-
-# Why alpine? Smaller attack surface, faster builds
-# node:18-alpine ~= 120MB vs node:18 ~= 350MB</code></pre>
-
-          <p><strong>Base Image Strategy:</strong></p>
-          <ul>
-            <li>
-              <strong>Official Images:</strong> Use verified publishers (node,
-              nginx, postgres)
-            </li>
-            <li>
-              <strong>Alpine Variants:</strong> Minimal Linux distribution for
-              security
-            </li>
-            <li>
-              <strong>Specific Tags:</strong> Pin to exact versions for
-              reproducibility
-            </li>
-            <li>
-              <strong>Security Scanning:</strong> Regularly update base images
-            </li>
-          </ul>
-
-          <h4>Working Directory and File Operations</h4>
-          <pre><code># WORKDIR - Sets working directory for subsequent instructions
-WORKDIR /app
-
-# COPY - Copies files from host to container
-COPY package*.json ./
-COPY src/ ./src/
-COPY healthcheck/ ./healthcheck/
-
-# ADD - Similar to COPY but supports URLs and auto-extraction
-# Generally prefer COPY for local files</code></pre>
-
-          <h4>Dependency Installation and Optimization</h4>
-          <pre><code># RUN - Executes commands in the container
-RUN npm ci --only=production \
-    && npm cache clean --force \
-    && rm -rf /tmp/*
-
-# Why 'npm ci'? Faster, reliable, reproducible installs
-# Cleanup in same layer to reduce image size</code></pre>
-
-          <h4>Runtime Configuration</h4>
-          <pre><code># ENV - Sets environment variables
-ENV NODE_ENV=production
-ENV PORT=3000
-
-# EXPOSE - Documents port usage (doesn't publish)
-EXPOSE 3000
-
-# USER - Sets user for security (avoid root)
-USER node
-
-# CMD - Default command when container starts
-CMD ["node", "src/index.js"]
-
-# ENTRYPOINT - Command that cannot be overridden
-# ENTRYPOINT ["node"]
-# CMD ["src/index.js"]</code></pre>
-
-          <h3>Multi-Stage Builds for Optimization</h3>
-          <p>
-            Multi-stage builds allow you to separate build dependencies from
-            runtime, resulting in smaller, more secure production images.
-          </p>
-
-          <h4>React Build Example</h4>
-          <pre><code># Stage 1: Build stage
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# Stage 2: Production stage
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]</code></pre>
-
-          <p><strong>Multi-Stage Benefits:</strong></p>
-          <ul>
-            <li>
-              <strong>Size Reduction:</strong> Final image excludes build tools
-            </li>
-            <li><strong>Security:</strong> Removes development dependencies</li>
-            <li>
-              <strong>Clean Separation:</strong> Build vs runtime concerns
-            </li>
-            <li>
-              <strong>Faster Deployments:</strong> Smaller images transfer
-              faster
-            </li>
-          </ul>
-
-          <h3>Dockerfile Best Practices for CCDC</h3>
-
-          <h4>Security Considerations</h4>
-          <pre><code># ❌ BAD: Running as root
-FROM node:18-alpine
-COPY . /app
-CMD ["node", "/app/src/index.js"]
-
-# ✅ GOOD: Non-root user with proper permissions
-FROM node:18-alpine
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodeuser -u 1001
-WORKDIR /app
-COPY --chown=nodeuser:nodejs package*.json ./
-USER nodeuser
-RUN npm ci --only=production
-COPY --chown=nodeuser:nodejs . .
-CMD ["node", "src/index.js"]</code></pre>
-
-          <h4>Layer Optimization</h4>
-          <pre><code># ❌ BAD: Multiple RUN instructions create unnecessary layers
-RUN apt-get update
-RUN apt-get install -y curl
-RUN apt-get clean
-
-# ✅ GOOD: Combine related operations
-RUN apt-get update \
-    && apt-get install -y curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*</code></pre>
-
-          <h4>Build Context Optimization</h4>
-          <pre><code># .dockerignore - Exclude unnecessary files
-node_modules
-npm-debug.log
-.git
-.gitignore
-README.md
-.env
-.nyc_output
-coverage
-.coverage
-.cache</code></pre>
-
-          <hr />
-
-          <h2>4. Hands-on Containerization Demo</h2>
-          <p>
-            Now let's containerize our full stack application step by step. This
-            demonstrates the complete process from analysis to deployment.
-          </p>
-
-          <div class="alert alert-info" role="alert">
-            <h4 class="alert-heading">
-              <i class="bi bi-info-circle-fill"></i> Quick Testing with Makefile
-            </h4>
-            <p>
-              Before containerizing, you can test the applications natively
-              using the provided Makefile:
-            </p>
-            <pre><code># Navigate to the lecture assets directory
-cd week2/assets/lecture/
-
-# Install dependencies for both applications
-cd api-node && npm install && cd ..
-cd client-react && npm install && cd ..
-
-# Start PostgreSQL in Docker (background)
-make run-postgres
-
-# In separate terminals, start the services:
-# Terminal 1: Start API server
-make run-api-node
-
-# Terminal 2: Start React development server  
-make run-client-react
-
-# Test the application at http://localhost:5173
-# API accessible at http://localhost:3000</code></pre>
-            <p class="mb-0">
-              <strong>Note:</strong> The Makefile provides a quick way to run
-              the application stack for testing before containerization. This
-              helps verify functionality and understand dependencies.
-            </p>
-          </div>
-
-          <h3>Step 1: Containerizing the Node.js API</h3>
-          <p>
-            We'll create a production-ready Dockerfile for the Express API
-            service.
-          </p>
-
-          <h4>Create the API Dockerfile</h4>
-          <pre><code># api-node/Dockerfile
-FROM node:18-alpine
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodeuser -u 1001
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm ci --only=production && \
-    npm cache clean --force
-
-# Copy application code
-COPY --chown=nodeuser:nodejs src/ ./src/
-COPY --chown=nodeuser:nodejs healthcheck/ ./healthcheck/
-
-# Switch to non-root user
-USER nodeuser
-
-# Configure environment
-ENV NODE_ENV=production
-ENV PORT=3000
-
-# Expose port (documentation)
-EXPOSE 3000
-
-# Add health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node healthcheck/healthcheck.js
-
-# Start the application
-CMD ["node", "src/index.js"]</code></pre>
-
-          <h4>Build and Test the API Container</h4>
-          <pre><code># Build the API image
-cd api-node
-docker build -t ccdc-api-node:latest .
-
-# Test build success
-docker images | grep ccdc-api-node
-
-# Run a quick test (without database)
-docker run --rm -p 3000:3000 -e DATABASE_URL="postgresql://test:test@localhost:5432/test" ccdc-api-node:latest</code></pre>
-
-          <h3>Step 2: Containerizing the React Frontend</h3>
-          <p>
-            The frontend requires a multi-stage build to separate build
-            dependencies from the production nginx server.
-          </p>
-
-          <h4>Create the Frontend Dockerfile</h4>
-          <pre><code># client-react/Dockerfile
-# Stage 1: Build React application
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Build production assets
-RUN npm run build
-
-# Stage 2: Production nginx server
-FROM nginx:alpine
-
-# Copy built assets from build stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Create non-root user for nginx
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S nginxuser -u 1001 && \
-    chown -R nginxuser:nginx /var/cache/nginx && \
-    chown -R nginxuser:nginx /var/log/nginx && \
-    chown -R nginxuser:nginx /etc/nginx/conf.d && \
-    touch /var/run/nginx.pid && \
-    chown -R nginxuser:nginx /var/run/nginx.pid
-
-# Switch to non-root user
-USER nginxuser
-
-# Expose port
-EXPOSE 8080
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]</code></pre>
-
-          <h4>Build the Frontend Container</h4>
-          <pre><code># Build the frontend image
-cd client-react
-docker build -t ccdc-client-react:latest .
-
-# Test the build
-docker images | grep ccdc-client-react
-
-# Test static serving (before API integration)
-docker run --rm -p 8080:8080 ccdc-client-react:latest</code></pre>
-
-          <h3>Step 3: Complete Stack Deployment</h3>
-          <p>
-            Now we'll deploy the complete stack with proper networking and data
-            persistence.
-          </p>
-
-          <h4>Create Application Network and Volumes</h4>
-          <pre><code># Create dedicated network for our application
-docker network create ccdc-fullstack-net
-
-# Create volume for PostgreSQL data
-docker volume create postgres-data
-
-# Verify network and volume creation
-docker network ls | grep ccdc-fullstack
-docker volume ls | grep postgres-data</code></pre>
-
-          <h4>Deploy PostgreSQL Database</h4>
-          <pre><code># Deploy PostgreSQL container
-docker run -d \
-  --name postgres-db \
-  --network ccdc-fullstack-net \
-  -v postgres-data:/var/lib/postgresql/data \
-  -e POSTGRES_DB=webapp \
-  -e POSTGRES_USER=dbuser \
-  -e POSTGRES_PASSWORD=secure-db-password-2024 \
-  -p 5432:5432 \
-  postgres:15-alpine
-
-# Wait for database to initialize
-sleep 10
-
-# Verify database is running
-docker logs postgres-db | tail -5</code></pre>
-
-          <h4>Deploy the API Service</h4>
-          <pre><code># Deploy API container with database connection
-docker run -d \
-  --name api-node \
-  --network ccdc-fullstack-net \
-  -e DATABASE_URL="postgresql://dbuser:secure-db-password-2024@postgres-db:5432/webapp" \
-  -e PORT=3000 \
-  -p 3000:3000 \
-  ccdc-api-node:latest
-
-# Test API health
-sleep 5
-curl http://localhost:3000/ping
-curl http://localhost:3000/</code></pre>
-
-          <h4>Deploy the Frontend Service</h4>
-          <pre><code># Deploy frontend container
-docker run -d \
-  --name client-react \
-  --network ccdc-fullstack-net \
-  -p 8080:8080 \
-  ccdc-client-react:latest
-
-# Test frontend health
-curl http://localhost:8080/ping
-
-# Test full stack integration
-curl http://localhost:8080/api/node/</code></pre>
-
-          <h4>Verify Complete Stack Operation</h4>
-          <pre><code># Check all containers are running
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
-# Test end-to-end functionality
-echo "Testing full stack integration..."
-curl -s http://localhost:8080/api/node/ | jq .
-
-# Check container logs for any issues
-docker logs api-node | tail -5
-docker logs client-react | tail -5
-docker logs postgres-db | tail -5</code></pre>
-
-          <h3>Migration Success Verification</h3>
-          <p>
-            Verify that our containerized application matches the original
-            functionality:
-          </p>
-
-          <ol>
-            <li>
-              ✅ <strong>Frontend Accessible:</strong> http://localhost:8080
-            </li>
-            <li>
-              ✅
-              <strong>API Responsive:</strong> http://localhost:8080/api/node/
-            </li>
-            <li>
-              ✅ <strong>Database Connected:</strong> Timestamp returned from DB
-            </li>
-            <li>
-              ✅ <strong>Health Checks:</strong> /ping endpoints operational
-            </li>
-            <li>
-              ✅ <strong>Container Security:</strong> Non-root users, minimal
-              attack surface
-            </li>
-            <li>
-              ✅ <strong>Data Persistence:</strong> Database data survives
-              container restarts
-            </li>
-          </ol>
-
-          <h3>CCDC Containerization Best Practices</h3>
-
-          <h4>Security Hardening Checklist</h4>
-          <ul>
-            <li>🔒 <strong>Non-root users</strong> in all containers</li>
-            <li>
-              🔒 <strong>Minimal base images</strong> (Alpine Linux preferred)
-            </li>
-            <li>
-              🔒 <strong>No secrets in images</strong> (use environment
-              variables)
-            </li>
-            <li>
-              🔒 <strong>Health checks implemented</strong> for monitoring
-            </li>
-            <li>
-              🔒 <strong>Network isolation</strong> with dedicated networks
-            </li>
-            <li>🔒 <strong>Read-only filesystems</strong> where possible</li>
-          </ul>
-
-          <h4>Operational Excellence</h4>
-          <ul>
-            <li>📊 <strong>Resource limits</strong> set for CPU and memory</li>
-            <li>
-              📊 <strong>Restart policies</strong> configured appropriately
-            </li>
-            <li>📊 <strong>Logging configured</strong> for troubleshooting</li>
-            <li>📊 <strong>Backup procedures</strong> for persistent data</li>
-            <li>📊 <strong>Rollback strategy</strong> documented and tested</li>
-          </ul>
-
-          <h4>Quick Migration Reference</h4>
-          <pre><code># Standard migration workflow
-1. docker network create [app-name]-net
-2. docker volume create [data-volume-name]
-3. docker build -t [app-name]:[version] .
-4. docker run -d --name [service] --network [app-name]-net [app-name]:[version]
-5. Test functionality and performance
-6. Update documentation and monitoring</code></pre>
-
-          <h4>Cleanup Commands</h4>
-          <pre><code># Clean up the demo environment
-docker stop client-react api-node postgres-db
-docker rm client-react api-node postgres-db
-docker network rm ccdc-fullstack-net
-docker volume rm postgres-data
-docker rmi ccdc-api-node:latest ccdc-client-react:latest</code></pre>
-
-          <p>
-            <strong>CCDC Competition Note:</strong> During competitions,
-            prioritize working solutions over perfect optimization.
-            Containerization can improve security and manageability, but
-            maintain service availability first. Document all changes for team
-            communication and scoring purposes.
-          </p>
+         
         </div>
         <div
           class="tab-pane fade"
