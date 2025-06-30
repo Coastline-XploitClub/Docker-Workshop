@@ -212,8 +212,8 @@ sudo apt install -y postgresql-client
 sudo apt install -y curl jq tmux tree
 
 # Clone the Week 2 repository
-git clone https://github.com/devurandom11/ccdc-container-workshop.git
-cd ccdc-container-workshop/week2/assets/lecture/
+git clone -b Week-2 https://github.com/Coastline-XploitClub/Docker-Workshop.git
+cd Docker-Workshop/assets/lecture/
 
 # Verify installations
 node --version  # Should be 18.x or higher
@@ -257,53 +257,170 @@ psql --version</code></pre>
           </p>
 
           <h4>Service Dependencies Analysis</h4>
-          <pre><code># package.json reveals critical information
+          <pre><code># package.json file contents
 {
   "name": "api-node",
+  "version": "1.0.0",
+  "description": "simple api that connects to postgres",
   "main": "src/index.js",
-  "dependencies": {
-    "express": "^4.18.2",    # Web framework
-    "morgan": "^1.10.0",     # Logging middleware
-    "pg": "^8.8.0"           # PostgreSQL client
-  },
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "debug": "nodemon --inspect ./src/index.js",
+    "debug-docker": "nodemon --inspect=0.0.0.0:9229 ./src/index.js",
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.8.0"
+  },
+  "devDependencies": {
+    "jest": "^29.4.1",
+    "nodemon": "^2.0.20"
   }
-}</code></pre>
+}
+</code></pre>
 
-          <p><strong>Key Analysis Points:</strong></p>
-          <ul>
-            <li>
-              <strong>Runtime:</strong> Node.js (requires specific version)
-            </li>
-            <li><strong>Database:</strong> PostgreSQL connection required</li>
-            <li>
-              <strong>Port:</strong> Configurable via PORT environment variable
-              (default: 3000)
-            </li>
-            <li><strong>Health Check:</strong> `/ping` endpoint available</li>
-          </ul>
+          <h4>Health Check Implementation</h4>
+          <pre><code># healthcheck/healthcheck.js file contents
+var http = require('http');
 
-          <h4>Environment Configuration</h4>
-          <pre><code># Database connection handling in db.js
-databaseUrl = 
+var options = {
+  timeout: 2000,
+  host: 'localhost',
+  port: process.env.PORT || 3000,
+  path: '/ping',
+};
+
+var request = http.request(options, (res) => {
+  console.info('STATUS: ' + res.statusCode);
+  process.exitCode = res.statusCode === 200 ? 0 : 1;
+  process.exit();
+});
+
+request.on('error', function (err) {
+  console.error('ERROR', err);
+  process.exit(1);
+});
+
+request.end();
+
+</code></pre>
+
+          <h4>Database Connection Module</h4>
+          <pre><code># src/db.js file contents
+const fs = require('fs');
+
+const { Pool } = require('pg');
+
+databaseUrl =
   process.env.DATABASE_URL ||
   fs.readFileSync(process.env.DATABASE_URL_FILE, 'utf8');
 
 const pool = new Pool({
   connectionString: databaseUrl,
-});</code></pre>
+});
+
+// the pool will emit an error on behalf of any idle clients
+// it contains if a backend error or network partition happens
+pool.on('error', (err, client) => {
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
+
+// async/await - check out a client
+const getDateTime = async () => {
+  const client = await pool.connect();
+  try {
+    const res = await client.query('SELECT NOW() as now;');
+    return res.rows[0];
+  } catch (err) {
+    console.log(err.stack);
+  } finally {
+    client.release();
+  }
+};
+
+module.exports = { getDateTime };
+</code></pre>
+
+          <h4>Main Application Server</h4>
+          <pre><code># src/index.js file contents
+const { getDateTime } = require('./db');
+
+const express = require('express');
+const morgan = require('morgan');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// setup the logger
+app.use(morgan('tiny'));
+
+app.get('/', async (req, res) => {
+  const dateTime = await getDateTime();
+  const response = dateTime;
+  response.api = 'node';
+  res.send(response);
+});
+
+app.get('/ping', async (_, res) => {
+  res.send('pong');
+});
+
+const server = app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
+
+process.on('SIGTERM', () => {
+  console.debug('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.debug('HTTP server closed');
+  });
+});
+</code></pre>
+
+          <p><strong>Key Analysis Points:</strong></p>
+          <ul>
+            <li><strong>Runtime:</strong> Node.js with Express.js framework</li>
+            <li><strong>Database:</strong> PostgreSQL connection required</li>
+            <li>
+              <strong>Port:</strong> Configurable via PORT environment variable
+              (default: 3000)
+            </li>
+            <li>
+              <strong>Health Check:</strong> `/ping` endpoint returns "pong"
+            </li>
+            <li>
+              <strong>Endpoints:</strong> Root endpoint `/` returns database
+              timestamp with API identifier
+            </li>
+            <li>
+              <strong>Logging:</strong> Morgan middleware for HTTP request
+              logging
+            </li>
+            <li>
+              <strong>Graceful Shutdown:</strong> SIGTERM signal handling
+              implemented
+            </li>
+          </ul>
 
           <p><strong>Configuration Requirements:</strong></p>
           <ul>
             <li>
               <code>DATABASE_URL</code> - Direct database connection string
+              (primary option)
             </li>
             <li>
               <code>DATABASE_URL_FILE</code> - Path to file containing
-              connection string (Docker secrets pattern)
+              connection string (fallback option, used for Docker secrets)
             </li>
-            <li><code>PORT</code> - Service listening port (default: 3000)</li>
+            <li>
+              <code>PORT</code> - Service listening port (optional, default:
+              3000)
+            </li>
           </ul>
 
           <h3>Analyzing the React Frontend</h3>
@@ -313,45 +430,166 @@ const pool = new Pool({
           </p>
 
           <h4>Build Requirements</h4>
-          <pre><code># package.json build configuration
+          <pre><code># package.json file contents
 {
   "name": "client-react",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",      # Development server
-    "build": "vite build",     # Production build
-    "preview": "vite preview"  # Preview built assets
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^4.22.4",
+    "axios": "^1.2.3",
     "react": "^18.2.0",
-    "axios": "^1.2.3",           # API communication
-    "@tanstack/react-query": "^4.22.4"  # State management
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-query-devtools": "^4.24.4",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "@vitejs/plugin-react-swc": "^3.0.0",
+    "vite": "^4.0.0"
   }
-}</code></pre>
+}
+</code></pre>
 
           <h4>Nginx Reverse Proxy Configuration</h4>
           <pre><code># nginx.conf - Production serving strategy
 server {
   listen 8080;
-  resolver 127.0.0.11;  # Docker DNS resolver
   
-  # Health check endpoint
+  # Docker internal dns server
+  resolver 127.0.0.11;
+  
   location /ping {
-    return 200 "pong";
+        access_log off;
+        add_header 'Content-Type' 'text/plain';
+        return 200 "pong";
   }
-  
-  # API proxy to backend service
   location /api/node/ {
-    set $api_node_upstream http://api-node:3000/;
-    proxy_pass $api_node_upstream;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+
+        set $api_node_upstream http://api-node:3000/;
+        proxy_pass $api_node_upstream;
   }
-  
-  # Static asset serving
   location / {
     root /usr/share/nginx/html;
+    index index.html index.htm;
     try_files $uri $uri/ /index.html =404;
   }
+  
+  include /etc/nginx/extra-conf.d/*.conf;
 }</code></pre>
+
+          <h4>React Frontend Application</h4>
+          <pre><code># src/App.jsx file contents
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import axios from "axios";
+
+import './App.css'
+
+const queryClient = new QueryClient();
+
+function CurrentTime(props) {
+  const { isLoading, error, data, isFetching } = useQuery({
+    queryKey: [props.api],
+    queryFn: () =&gt;
+      axios
+        .get(`${props.api}`)
+        .then((res) =&gt; res.data),
+  });
+
+  if (isLoading) return `Loading ${props.api}... `;
+
+  if (error) return "An error has occurred: " + error.message;
+
+  return (
+    &lt;div className="App"&gt;
+      &lt;p&gt;---&lt;/p&gt;
+      &lt;p&gt;API: {data.api}&lt;/p&gt;
+      &lt;p&gt;Time from DB: {data.now}&lt;/p&gt;
+      &lt;div&gt;{isFetching ? "Updating..." : ""}&lt;/div&gt;
+    &lt;/div&gt;
+  )
+}
+
+export function App() {
+  return (
+    &lt;QueryClientProvider client={queryClient}&gt;
+      &lt;h1&gt;Hey Team! 👋&lt;/h1&gt;
+      &lt;CurrentTime api="/api/node/"/&gt;
+      &lt;ReactQueryDevtools initialIsOpen={false} /&gt;
+    &lt;/QueryClientProvider&gt;
+  );
+}
+
+export default App
+</code></pre>
+
+          <p><strong>Key Analysis Points:</strong></p>
+          <ul>
+            <li><strong>Framework:</strong> React 18 with Vite build tool</li>
+            <li>
+              <strong>State Management:</strong> TanStack React Query for server
+              state
+            </li>
+            <li><strong>API Communication:</strong> Axios for HTTP requests</li>
+            <li>
+              <strong>Development Tools:</strong> React Query DevTools for
+              debugging
+            </li>
+            <li>
+              <strong>Build Process:</strong> Vite for fast development and
+              production builds
+            </li>
+            <li>
+              <strong>Proxy Configuration:</strong> API calls routed through
+              Nginx reverse proxy
+            </li>
+            <li>
+              <strong>Error Handling:</strong> Built-in error states for API
+              failures
+            </li>
+            <li>
+              <strong>Loading States:</strong> UI feedback during data fetching
+            </li>
+          </ul>
+
+          <p><strong>Configuration Requirements:</strong></p>
+          <ul>
+            <li>
+              <strong>Build Output:</strong> Static files generated to
+              <code>dist/</code> directory
+            </li>
+            <li>
+              <strong>API Endpoint:</strong> Frontend expects API at
+              <code>/api/node/</code> path
+            </li>
+            <li>
+              <strong>Nginx Serving:</strong> Requires reverse proxy for API and
+              static file serving
+            </li>
+            <li>
+              <strong>Node.js Version:</strong> Compatible with Vite build
+              requirements
+            </li>
+            <li>
+              <strong>Environment:</strong> Production build needed for
+              deployment
+            </li>
+          </ul>
 
           <p><strong>CCDC Analysis Checklist:</strong></p>
           <ol>
