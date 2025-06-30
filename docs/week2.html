@@ -633,13 +633,91 @@ export default App
             </h4>
             <p>
               Follow these steps to run the complete application stack on your
-              local machine.
+              local machine. Since you're connected via SSH and will need
+              multiple terminal sessions, we'll use tmux to manage everything
+              efficiently.
             </p>
           </div>
 
-          <h3>Step 1: Navigate to Application Directory</h3>
-          <pre><code># Navigate to the week2 lecture assets
-cd week2/assets/lecture/
+          <h3>Step 0: Set Up tmux Session Management</h3>
+          <p>
+            Since this exercise requires multiple terminal sessions (database,
+            API server, frontend server, and testing), we'll use tmux to manage
+            them all within your SSH connection. This prevents losing work if
+            your SSH connection drops and makes it easy to switch between
+            different components.
+          </p>
+
+          <h4>Create and Configure tmux Session</h4>
+          <pre><code># Start a new tmux session named 'ccdc-app'
+tmux new-session -d -s ccdc-app
+
+# Attach to the session
+tmux attach-session -t ccdc-app
+
+# You're now in tmux! The status bar at the bottom shows:
+# [0] 0:bash*    "hostname"  DD-MMM HH:MM</code></pre>
+
+          <h4>Create Named Windows for Each Component</h4>
+          <pre><code># Create and name windows for each service
+# Window 0: Main/Setup (current window)
+Ctrl+b ,
+# Type: setup
+# Press Enter
+
+# Create new window for database
+Ctrl+b c
+Ctrl+b ,
+# Type: database
+# Press Enter
+
+# Create new window for API server  
+Ctrl+b c
+Ctrl+b ,
+# Type: api
+# Press Enter
+
+# Create new window for frontend
+Ctrl+b c
+Ctrl+b ,
+# Type: frontend
+# Press Enter
+
+# Create new window for testing
+Ctrl+b c
+Ctrl+b ,
+# Type: testing
+# Press Enter</code></pre>
+
+          <h4>tmux Navigation Reference</h4>
+          <pre><code># Essential tmux commands (Ctrl+b is the prefix key):
+Ctrl+b 0    # Switch to window 0 (setup)
+Ctrl+b 1    # Switch to window 1 (database)  
+Ctrl+b 2    # Switch to window 2 (api)
+Ctrl+b 3    # Switch to window 3 (frontend)
+Ctrl+b 4    # Switch to window 4 (testing)
+
+Ctrl+b n    # Next window
+Ctrl+b p    # Previous window
+Ctrl+b l    # Last used window
+
+Ctrl+b d    # Detach from session (keeps running)
+# To reattach later: tmux attach-session -t ccdc-app
+
+Ctrl+b [    # Enter scroll mode (use arrow keys, q to exit)</code></pre>
+
+          <div class="alert alert-info" role="alert">
+            <strong>Note:</strong> Your tmux status bar should now show named
+            windows: <code>[setup] [database] [api] [frontend] [testing]</code>.
+            The asterisk (*) indicates your current window.
+          </div>
+
+          <h3>Step 1: Navigate to Application Directory (Setup Window)</h3>
+          <p>
+            Make sure you're in the "setup" window (Ctrl+b 0) for initial setup:
+          </p>
+          <pre><code># Navigate to the Docker Workshop lecture assets
+cd Docker-Workshop/assets/lecture/
 
 # Verify the application structure
 ls -la
@@ -668,13 +746,20 @@ ls api-node/node_modules | wc -l
 echo "React dependencies installed:"
 ls client-react/node_modules | wc -l</code></pre>
 
-          <h3>Step 3: Start PostgreSQL Database</h3>
+          <h3>Step 3: Start PostgreSQL Database (Database Window)</h3>
           <p>
-            The API requires a PostgreSQL database. We'll use Docker to run
-            PostgreSQL while keeping the application code running natively.
+            Switch to the database window (Ctrl+b 1) and start PostgreSQL. We'll
+            use Docker to run PostgreSQL while keeping the application code
+            running natively.
           </p>
 
-          <pre><code># Start PostgreSQL using the provided Makefile
+          <pre><code># Switch to database window
+Ctrl+b 1
+
+# Navigate to application directory
+cd Docker-Workshop/assets/lecture/
+
+# Start PostgreSQL using the provided Makefile
 make run-postgres
 
 # Alternative manual command:
@@ -691,14 +776,19 @@ docker ps | grep postgres
 sleep 5
 psql postgres://postgres:ccdc-password@localhost:5432/postgres -c "SELECT version();"</code></pre>
 
-          <h3>Step 4: Start the Node.js API Server</h3>
+          <h3>Step 4: Start the Node.js API Server (API Window)</h3>
           <p>
-            Open a new terminal window/tab and start the API server. This will
-            run in development mode with auto-reload capabilities.
+            Switch to the API window (Ctrl+b 2) and start the API server. This
+            will run in development mode with auto-reload capabilities.
           </p>
 
-          <pre><code># In Terminal 1: Start the API server
-cd week2/assets/lecture/
+          <pre><code># Switch to API window
+Ctrl+b 2
+
+# Navigate to application directory
+cd Docker-Workshop/assets/lecture/
+
+# Start the API server
 make run-api-node
 
 # Alternative manual command:
@@ -709,13 +799,16 @@ make run-api-node
 # [nodemon] starting `node src/index.js`
 # Example app listening on port 3000</code></pre>
 
-          <h3>Step 5: Test the API Endpoints</h3>
+          <h3>Step 5: Test the API Endpoints (Testing Window)</h3>
           <p>
-            With the API running, let's test its endpoints to understand its
-            functionality.
+            Switch to the testing window (Ctrl+b 4) to test the API endpoints
+            while keeping the API server running in its own window.
           </p>
 
-          <pre><code># In a new terminal: Test API health check
+          <pre><code># Switch to testing window
+Ctrl+b 4
+
+# Test API health check
 curl http://localhost:3000/ping
 
 # Expected response: pong
@@ -729,15 +822,20 @@ curl http://localhost:3000/ | jq .
 #   "api": "node"
 # }</code></pre>
 
-          <h3>Step 6: Start the React Frontend</h3>
+          <h3>Step 6: Start the React Frontend (Frontend Window)</h3>
           <p>
-            Open another terminal window/tab and start the React development
-            server. This will build and serve the frontend with hot-reload
-            capabilities.
+            Switch to the frontend window (Ctrl+b 3) and start the React
+            development server. This will build and serve the frontend with
+            hot-reload capabilities.
           </p>
 
-          <pre><code># In Terminal 2: Start the React development server
-cd week2/assets/lecture/
+          <pre><code># Switch to frontend window
+Ctrl+b 3
+
+# Navigate to application directory
+cd Docker-Workshop/assets/lecture/
+
+# Start the React development server
 make run-client-react
 
 # Alternative manual command:
@@ -759,24 +857,36 @@ make run-client-react
 open http://localhost:5173
 # Or: curl http://localhost:5173</code></pre>
 
-          <h4>Test Frontend-to-API Communication</h4>
-          <pre><code># The React app should automatically fetch data from the API
-# Watch the API terminal for incoming requests
+          <h4>Test Frontend-to-API Communication (Testing Window)</h4>
+          <pre><code># Switch back to testing window
+Ctrl+b 4
+
+# The React app should automatically fetch data from the API
+# You can monitor the API logs by switching to the API window (Ctrl+b 2)
 
 # Test the proxy configuration manually
 curl http://localhost:5173/api/node/ | jq .
 
 # This should return the same response as the direct API call</code></pre>
 
-          <h4>Monitor Application Behavior</h4>
-          <pre><code># Watch API logs in Terminal 1
-# Watch React dev server logs in Terminal 2
+          <h4>Monitor Application Behavior Across Windows</h4>
+          <pre><code># Use tmux to monitor all components:
+Ctrl+b 2    # Check API server logs
+Ctrl+b 3    # Check React dev server logs  
+Ctrl+b 4    # Return to testing window
 
-# Refresh the frontend page and observe:
-# 1. API receives GET requests
-# 2. Database queries are executed
+# From testing window, refresh the frontend and observe:
+# 1. Switch to API window (Ctrl+b 2) - see GET requests
+# 2. Database queries are executed (visible in API logs)
 # 3. Responses are returned to the frontend
-# 4. React updates the displayed timestamp</code></pre>
+# 4. Switch to frontend window (Ctrl+b 3) - see build/reload activity</code></pre>
+
+          <div class="alert alert-info" role="alert">
+            <strong>💡 tmux Session Management:</strong> If your SSH connection
+            drops, you can reconnect and reattach to your session with:
+            <br /><code>tmux attach-session -t ccdc-app</code> <br />All your
+            services will still be running in their respective windows!
+          </div>
 
           <h3>Application Behavior Analysis</h3>
           <p>
