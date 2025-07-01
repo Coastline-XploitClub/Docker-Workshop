@@ -1806,10 +1806,36 @@ docker system prune -af
             </p>
           </div>
 
+          <h3>Step 0: Start PostgreSQL Database First</h3>
+          <p>
+            Make sure you're in the Docker Workshop lecture directory where the
+            application code is located:
+          </p>
+          <pre><code># Navigate to the workshop directory (adjust path as needed)
+cd ~/Docker-Workshop/assets/lecture/
+
+# Verify you can see the application directories
+ls -la
+# You should see: api-node/ client-react/ Makefile</code></pre>
+
+          <pre><code># Start PostgreSQL container first
+docker run -d \
+  --name postgres-api \
+  -e POSTGRES_PASSWORD=ccdc-password \
+  -v pgdata-api:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15.1-alpine
+
+# Wait for database to be ready
+sleep 10
+
+# Verify database is running
+docker exec postgres-api psql -U postgres -c "SELECT version();"</code></pre>
+
           <h3>Step 1: Basic Dockerfile (Naive Approach)</h3>
           <p>
-            Let's start with the simplest possible Dockerfile to get our API
-            running in a container:
+            Now that we have a database running, let's start with the simplest
+            possible Dockerfile to get our API running in a container:
           </p>
 
           <div class="code-container">
@@ -1842,8 +1868,14 @@ EOF
 # Build the image
 docker build -t api-node:basic .
 
-# Run the container (won't work yet - we need database)
-docker run -p 3000:3000 api-node:basic</code></pre>
+# Run the container with database connection
+docker run -d -p 3000:3000 \
+  -e DATABASE_URL=postgres://postgres:ccdc-password@host.docker.internal:5432/postgres \
+  api-node:basic
+
+# Test the API
+curl http://localhost:3000/ping
+# Expected: pong</code></pre>
 
           <p><strong>Problems with this approach:</strong></p>
           <ul>
@@ -2168,8 +2200,11 @@ CMD [ "node", "src/index.js" ]</code></pre>
           <pre><code># Build and run with explicit port mapping
 docker build -f Dockerfile.ports -t api-node:ports .
 
+# Stop previous test container
+docker rm -f $(docker ps -a | grep api-node | awk '{print $1}')
+
 # Run with port mapping
-docker run -d -p 3000:3000 --name api-test api-node:ports
+docker run -d -e DATABASE_URL=postgres://postgres:ccdc-password@host.docker.internal:5432/postgres -p 3000:3000 --name api-test api-node:ports
 
 # Test the API
 curl http://localhost:3000/ping
@@ -2294,39 +2329,22 @@ EXPOSE 3000
 CMD [ "node", "src/index.js" ]</code></pre>
           </div>
 
-          <h4>Creating a Health Check Script</h4>
-          <pre><code># Create healthcheck directory and script
-mkdir -p healthcheck
+          <h4>Using the Existing Health Check Script</h4>
+          <pre><code># The healthcheck script already exists in the project
+ls healthcheck/healthcheck.js
 
-cat > healthcheck/healthcheck.js &lt;&lt; 'EOF'
-var http = require('http');
+# View the health check script contents
+cat healthcheck/healthcheck.js
 
-var options = {
-  timeout: 2000,
-  host: 'localhost',
-  port: process.env.PORT || 3000,
-  path: '/ping',
-};
-
-var request = http.request(options, (res) => {
-  console.info('STATUS: ' + res.statusCode);
-  process.exitCode = res.statusCode === 200 ? 0 : 1;
-  process.exit();
-});
-
-request.on('error', function (err) {
-  console.error('ERROR', err);
-  process.exit(1);
-});
-
-request.end();
-EOF
+# The script tests the /ping endpoint and returns proper exit codes:
+# - Exit code 0 if the health check passes (HTTP 200)
+# - Exit code 1 if the health check fails
 
 # Build and test health check
 docker build -f Dockerfile.healthcheck -t api-node:healthcheck .
 
 # Run with health check
-docker run -d -p 3000:3000 --name api-health api-node:healthcheck
+docker run -d -e DATABASE_URL=postgres://postgres:ccdc-password@host.docker.internal:5432/postgres -p 3000:3000 --name api-health api-node:healthcheck
 
 # Test health check manually
 docker exec api-health node healthcheck/healthcheck.js
@@ -2419,10 +2437,7 @@ docker build -f Dockerfile.multistage --target production -t api-node:prod .
 # Compare image sizes and dependencies
 docker images | grep api-node
 docker run --rm api-node:dev ls node_modules | wc -l
-docker run --rm api-node:prod ls node_modules | wc -l
-
-# Test development mode with hot reload
-docker run -v $(pwd)/src:/usr/src/app/src -p 3000:3000 api-node:dev</code></pre>
+docker run --rm api-node:prod ls node_modules | wc -l</code></pre>
 
           <p><strong>Multi-stage build advantages:</strong></p>
           <ul>
@@ -2443,6 +2458,25 @@ docker run -v $(pwd)/src:/usr/src/app/src -p 3000:3000 api-node:dev</code></pre>
               environment needs
             </li>
           </ul>
+
+          <h3>Cleanup: Stop the Test Database</h3>
+          <p>
+            Before moving on to the frontend containerization, clean up the test
+            database:
+          </p>
+          <pre><code># Stop and remove the PostgreSQL container
+docker stop postgres-api
+docker rm postgres-api
+
+# Remove the volume if you want a fresh start
+docker volume rm pgdata-api
+
+# Remove test images (optional)
+docker rmi api-node:basic api-node:pinned api-node:workdir api-node:cache \
+  api-node:security api-node:production api-node:ports api-node:buildkit \
+  api-node:healthcheck api-node:dev api-node:prod
+  docker rm -f $(docker ps -a -q)
+</code></pre>
 
           <div class="alert alert-success" role="alert">
             <h4 class="alert-heading">✅ API Containerization Complete</h4>
@@ -2755,52 +2789,26 @@ COPY --from=build /usr/src/app/dist/ /usr/share/nginx/html
 EXPOSE 8080</code></pre>
           </div>
 
-          <h4>Creating Nginx Configuration</h4>
+          <h4>Using the Existing Nginx Configuration</h4>
           <p>
-            The React application needs an Nginx configuration that handles
-            routing and API proxying:
+            The React application already includes an Nginx configuration that
+            handles routing and API proxying:
           </p>
 
           <div class="code-container">
             <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
-            <pre><code># Create nginx.conf for React application
-cat > nginx.conf &lt;&lt; 'EOF'
-server {
-    listen 8080;
-    
-    # Docker internal DNS resolver
-    resolver 127.0.0.11;
-    
-    # Health check endpoint
-    location /ping {
-        access_log off;
-        add_header 'Content-Type' 'text/plain';
-        return 200 "pong";
-    }
-    
-    # Proxy API requests to backend service
-    location /api/node/ {
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Server $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_http_version 1.1;
+            <pre><code># The nginx.conf file already exists in the project
+ls nginx.conf
 
-        # Backend service endpoint (Docker networking)
-        set $api_node_upstream http://api-node:3000/;
-        proxy_pass $api_node_upstream;
-    }
-    
-    # Serve React static files
-    location / {
-        root /usr/share/nginx/html;
-        index index.html index.htm;
-        try_files $uri $uri/ /index.html =404;
-    }
-    
-    # Include any additional configurations
-    include /etc/nginx/extra-conf.d/*.conf;
-}
-EOF</code></pre>
+# View the Nginx configuration
+cat nginx.conf
+
+# Key features of this configuration:
+# - Listens on port 8080 (unprivileged)
+# - Health check endpoint at /ping
+# - Proxies /api/node/ requests to the backend service
+# - Serves React static files with SPA routing support
+# - Uses Docker's internal DNS resolver (127.0.0.11)</code></pre>
           </div>
 
           <h4>Building and Testing Production Build</h4>
@@ -2947,6 +2955,31 @@ docker stop react-optimized && docker rm react-optimized</code></pre>
             using individual containers. This approach teaches the fundamentals
             before moving to orchestration tools.
           </p>
+
+          <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading">
+              <i class="bi bi-info-circle-fill"></i> Using the Dockerfiles
+            </h5>
+            <p>
+              Make sure you've created the Dockerfiles from the previous
+              sections in both directories:
+            </p>
+            <ul class="mb-0">
+              <li>
+                <strong>api-node/Dockerfile.multistage</strong> - Multi-stage
+                build for the API
+              </li>
+              <li>
+                <strong>client-react/Dockerfile.optimized</strong> - Optimized
+                build for the frontend
+              </li>
+              <li>
+                Both directories already contain necessary files like
+                <code>.dockerignore</code>, <code>healthcheck/</code>, and
+                <code>nginx.conf</code>
+              </li>
+            </ul>
+          </div>
 
           <div class="alert alert-warning" role="alert">
             <h4 class="alert-heading">
