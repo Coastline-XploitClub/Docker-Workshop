@@ -1080,7 +1080,2200 @@ docker volume rm pgdata</code></pre>
 
           <hr />
 
-         
+          <h2>3. Dockerfile Fundamentals</h2>
+          <p>
+            Dockerfiles are the blueprint for creating container images.
+            Understanding Dockerfile syntax and best practices is essential for
+            secure, efficient containerization in CCDC environments.
+          </p>
+
+          <h3>Essential Dockerfile Instructions</h3>
+          <p>
+            A Dockerfile is a text file containing instructions that Docker uses
+            to automatically build container images. Think of it as a recipe
+            that defines how to transform a base operating system into a
+            customized environment for your application.
+          </p>
+
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-play-circle-fill"></i> Hands-On Exercise:
+              Dockerfile Fundamentals
+            </h4>
+            <p>
+              We'll examine and build a comprehensive example Dockerfile that
+              demonstrates all the essential instructions and advanced features
+              you'll need in CCDC environments.
+            </p>
+          </div>
+
+          <h4>Understanding the Complete Dockerfile Example</h4>
+          <p>
+            Let's examine a comprehensive Dockerfile that showcases modern
+            Docker features and best practices:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># syntax=docker/dockerfile:1.5
+# escape=\
+# ^ OPTIONAL "directives" (must be at top if used)
+
+# THIS IS A COMMENT
+
+# ARG is the only instruction that can come before FROM 
+ARG BASE_IMAGE_TAG=19.4
+# ARGs can be overridden at build time 
+# > docker build --build-arg BASE_IMAGE_TAG=19.3 .
+
+FROM node:${BASE_IMAGE_TAG}
+
+LABEL org.opencontainers.image.authors="ccdc-team@coastline.edu"
+
+RUN echo "Hey Team 👋 (shell form)"
+RUN ["echo", "Hey Team 👋 (exec form)"]
+
+# Heredocs allow for specifying multiple commands to 
+# be run within a single step, across multiple lines
+# without lots of && and \
+RUN &lt;&lt;EOT
+apt update
+apt install curl -y
+EOT
+
+# --mount allows for mounting additional files
+# into the build context
+# RUN --mount=type=bind ...
+# RUN --mount=type=cache ...
+# RUN --mount=type=ssh ...
+
+# Available only at build time
+# (Still in image metadata though...)
+ARG BUILD_ARG=foo
+
+# Available at build and run time
+ENV ENV_VAR=bar
+
+# Set the default working directory 
+# Use the convention of your language/framework 
+WORKDIR /app
+
+# Practical example: Use secret to create a config file during build
+# This simulates using an API key or database password during setup
+# NOTE: Comment out these lines for basic builds, uncomment for secrets demo
+# RUN --mount=type=secret,id=secret.txt,dst=/tmp/build-secret \
+#     API_KEY=$(cat /tmp/build-secret) && \
+#     echo "api_endpoint=https://api.example.com" > /app/config.txt && \
+#     echo "api_key_hash=$(echo -n $API_KEY | sha256sum | cut -d' ' -f1)" >> /app/config.txt && \
+#     echo "build_timestamp=$(date -Iseconds)" >> /app/config.txt && \
+#     echo "Build completed with secret, length: $(echo -n $API_KEY | wc -c) characters"
+
+ENTRYPOINT [ "echo", "Hey Team 👋 (entrypoint)" ]
+CMD [ "+ (cmd)" ]</code></pre>
+          </div>
+
+          <h4>Building and Testing the Example Dockerfile</h4>
+          <p>
+            Let's build this Dockerfile step by step to understand how each
+            instruction works:
+          </p>
+
+          <h5>Step 1: Create the Dockerfile and Required Files</h5>
+          <pre><code># Create a working directory for our Dockerfile exercise
+mkdir dockerfile-fundamentals
+cd dockerfile-fundamentals
+
+# Create a secret file for demonstration
+echo "my-secret-key-123" > secret.txt
+
+# Create the basic Dockerfile by copying the example content above
+# Make sure the secret mount lines are commented out initially
+nano Dockerfile
+
+# The Dockerfile should have the secret mount lines commented out like this:
+# # RUN --mount=type=secret,id=secret.txt,dst=/tmp/build-secret \
+# #     API_KEY=$(cat /tmp/build-secret) && \
+# #     echo "api_endpoint=https://api.example.com" > /app/config.txt && \
+# #     echo "api_key_hash=$(echo -n $API_KEY | sha256sum | cut -d' ' -f1)" >> /app/config.txt && \
+# #     echo "build_timestamp=$(date -Iseconds)" >> /app/config.txt && \
+# #     echo "Build completed with secret, length: $(echo -n $API_KEY | wc -c) characters"
+</code></pre>
+
+          <h5>Step 2: Build the Image with Different Techniques</h5>
+          <p>
+            We'll build three different versions of our container to demonstrate
+            different Docker features. The first two builds will work with the
+            basic Dockerfile, and the third will require a modified version that
+            includes the secret mount.
+          </p>
+
+          <pre><code># Build with default ARG value (basic Dockerfile)
+docker build -t dockerfile-demo:default .
+
+# Build with custom ARG value (same Dockerfile, different ARG)
+docker build --build-arg BASE_IMAGE_TAG=18.19 -t dockerfile-demo:node18 .
+
+# For the secrets build, create a version with secrets enabled
+cp Dockerfile Dockerfile.secrets
+
+# Edit Dockerfile.secrets to uncomment the secret mount lines
+# Remove the # characters from the secret mount RUN instruction:
+sed -i 's/^# RUN --mount=type=secret/RUN --mount=type=secret/' Dockerfile.secrets
+sed -i 's/^#     /    /' Dockerfile.secrets
+
+# Verify the secret mount is now active in Dockerfile.secrets
+grep -A6 "RUN --mount=type=secret" Dockerfile.secrets
+
+# Build with secrets (using BuildKit)
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.secrets --secret id=secret.txt,src=secret.txt -t dockerfile-demo:secrets .
+
+# Compare the images created
+docker images | grep dockerfile-demo</code></pre>
+
+          <h5>Step 3: Run and Test the Container Behavior</h5>
+          <p>
+            Now we'll test all the features from our 3 different container
+            builds:
+            <code>dockerfile-demo:default</code>,
+            <code>dockerfile-demo:node18</code>, and
+            <code>dockerfile-demo:secrets</code>.
+          </p>
+
+          <h6>Testing ENTRYPOINT + CMD Behavior</h6>
+          <p>
+            <strong>Understanding the Container Setup:</strong>
+            Our demo container has
+            <code>ENTRYPOINT [ "echo", "Hey Team 👋 (entrypoint)" ]</code> and
+            <code>CMD [ "+ (cmd)" ]</code>. This setup demonstrates how Docker
+            combines ENTRYPOINT (always executed) with CMD (default arguments
+            that can be overridden).
+          </p>
+
+          <pre><code># Test 1: Default behavior (ENTRYPOINT + CMD concatenation)
+# Expected output: "Hey Team 👋 (entrypoint) + (cmd)"
+# What happens: Docker runs ENTRYPOINT + CMD arguments together
+echo "=== Default behavior (ENTRYPOINT + CMD) ==="
+docker run --rm dockerfile-demo:default
+echo ""
+
+# Test 2: Override CMD with custom arguments  
+# Expected output: "Hey Team 👋 (entrypoint) custom command"
+# What happens: Your arguments replace CMD entirely, but ENTRYPOINT still runs
+echo "=== Override CMD with custom arguments ==="
+docker run --rm dockerfile-demo:default "custom command"
+docker run --rm dockerfile-demo:default "Hello from CCDC Team!"
+echo ""
+
+# Test 3: ENTRYPOINT processes ANY arguments you provide
+# Expected output: "Hey Team 👋 (entrypoint) curl -s --head https://www.google.com"
+# What happens: The echo command displays all arguments, showing how ENTRYPOINT
+#               always executes but gets different arguments
+echo "=== ENTRYPOINT echoing various arguments ==="
+docker run --rm dockerfile-demo:default curl -s --head https://www.google.com
+echo ""
+
+docker run --rm dockerfile-demo:default ls -la /app
+echo ""</code></pre>
+
+          <p>
+            <strong>Key Learning Points:</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>ENTRYPOINT is immutable:</strong> Always executes "echo
+              Hey Team 👋 (entrypoint)"
+            </li>
+            <li>
+              <strong>CMD provides defaults:</strong> Used only when no
+              arguments are provided
+            </li>
+            <li>
+              <strong>Arguments override CMD:</strong> Any arguments you provide
+              replace CMD completely
+            </li>
+            <li>
+              <strong>ENTRYPOINT + arguments:</strong> Arguments become
+              parameters to the ENTRYPOINT command
+            </li>
+          </ul>
+
+          <h6>Testing ARG Build-Time Variables</h6>
+          <p>
+            <strong>Understanding ARG Variables:</strong>
+            ARG variables are only available during the build process and can be
+            overridden at build time. We built two images: one with the default
+            ARG value (<code>BASE_IMAGE_TAG=19.4</code>) and another with a
+            custom value (<code>--build-arg BASE_IMAGE_TAG=18.19</code>).
+          </p>
+
+          <pre><code># Test 1: Verify different Node.js versions from ARG customization
+# Expected: Default shows Node 19.4, custom shows Node 18.19
+# What happens: --entrypoint overrides our echo ENTRYPOINT to run node directly
+echo "=== Comparing Node.js versions in different builds ==="
+echo "Default build (Node 19.4):"
+docker run --rm --entrypoint node dockerfile-demo:default --version
+echo ""
+
+echo "Custom ARG build (Node 18.19):"
+docker run --rm --entrypoint node dockerfile-demo:node18 --version
+echo ""
+
+# Test 2: Compare resulting image sizes
+# Expected: Different base images may have different sizes
+# What happens: Shows how ARG choices affect final image characteristics
+echo "=== Image size comparison ==="
+docker images | grep dockerfile-demo | head -3</code></pre>
+
+          <p>
+            <strong>Key Learning Points:</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>ARG customization works:</strong> Different builds produce
+              containers with different Node.js versions
+            </li>
+            <li>
+              <strong>--entrypoint override:</strong> We can bypass the original
+              ENTRYPOINT to run different commands
+            </li>
+            <li>
+              <strong>Build-time decisions:</strong> ARG values influence the
+              final container without being stored as environment variables
+            </li>
+            <li>
+              <strong>Image comparison:</strong> Different base images result in
+              different sizes and characteristics
+            </li>
+          </ul>
+
+          <h6>Testing Environment Variables and Working Directory</h6>
+          <p>
+            <strong>Understanding ENV vs ARG:</strong>
+            Our Dockerfile defines <code>ARG BUILD_ARG=foo</code> (build-time
+            only) and <code>ENV ENV_VAR=bar</code> (runtime accessible). We also
+            set <code>WORKDIR /app</code> to establish the container's working
+            directory.
+          </p>
+
+          <pre><code># Test 1: Check which variables persist at runtime
+# Expected: ENV_VAR visible, BUILD_ARG not visible, NODE_VERSION from base image
+# What happens: ENV variables persist, ARG variables don't (but are in metadata)
+echo "=== Environment variables in default container ==="
+docker run --rm --entrypoint env dockerfile-demo:default | grep -E "(ENV_VAR|BUILD_ARG|NODE_VERSION)"
+echo ""
+
+# Test 2: Verify WORKDIR instruction worked correctly
+# Expected output: /app (our WORKDIR path)
+# What happens: pwd shows current working directory set by WORKDIR
+echo "=== Working directory verification ==="
+docker run --rm --entrypoint pwd dockerfile-demo:default
+echo ""
+
+# Test 3: Examine the working directory contents
+# Expected: Shows files/directories in /app (if any were copied there)
+# What happens: ls reveals what's actually in our WORKDIR
+echo "=== Directory contents ==="
+docker run --rm --entrypoint ls dockerfile-demo:default -la
+echo ""</code></pre>
+
+          <p>
+            <strong>Key Learning Points:</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>ENV persists at runtime:</strong> ENV_VAR will be visible
+              in the environment
+            </li>
+            <li>
+              <strong>ARG doesn't persist:</strong> BUILD_ARG won't appear in
+              the runtime environment
+            </li>
+            <li>
+              <strong>WORKDIR sets context:</strong> All commands run from the
+              specified directory
+            </li>
+            <li>
+              <strong>Base image variables:</strong> NODE_VERSION comes from the
+              Node.js base image
+            </li>
+          </ul>
+
+          <h6>Testing Installed Packages and Heredoc Results</h6>
+          <p>
+            <strong>Understanding Heredoc RUN Instructions:</strong>
+            Our Dockerfile used a heredoc syntax to install packages cleanly:
+            <code
+              >RUN &lt;&lt;EOF<br />apt update<br />apt install curl -y<br />EOF</code
+            >
+            This approach is cleaner than chaining commands with
+            <code>&&</code>.
+          </p>
+
+          <pre><code># Test 1: Verify the curl utility was installed successfully
+# Expected: Shows path to curl binary (e.g., /usr/bin/curl)
+# What happens: 'which' command locates installed curl utility
+echo "=== Verify curl utility installation ==="
+docker run --rm --entrypoint which dockerfile-demo:default curl
+echo ""
+
+# Test 2: Test that curl actually works
+# Expected: HTTP response headers from Google, showing successful connection
+# What happens: Demonstrates the installed package functions correctly and has network access
+echo "=== Test curl functionality ==="
+docker run --rm --entrypoint curl dockerfile-demo:default -I -s --connect-timeout 5 https://www.google.com
+echo ""
+
+# Test 3: Test API endpoint connectivity
+# Expected: JSON response or HTTP status, proving both curl and network work
+# What happens: curl makes HTTP request to external API service
+echo "=== Test API connectivity ==="
+docker run --rm --entrypoint curl dockerfile-demo:default -s --connect-timeout 5 https://httpbin.org/json
+echo ""</code></pre>
+
+          <p>
+            <strong>Key Learning Points:</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>Heredoc syntax works:</strong> Multi-line RUN commands
+              executed successfully
+            </li>
+            <li>
+              <strong>Package installation verified:</strong> curl utility is
+              properly installed and functional
+            </li>
+            <li>
+              <strong>Container has network access:</strong> Can reach external
+              HTTPS endpoints
+            </li>
+            <li>
+              <strong>HTTP connectivity confirmed:</strong> Can make web
+              requests and receive responses
+            </li>
+          </ul>
+
+          <h6>Testing Build Secrets (Security Feature)</h6>
+          <p>
+            <strong>Understanding Docker Build Secrets:</strong>
+            Build secrets allow access to sensitive data during build time
+            without persisting it in the final image. Our Dockerfile used
+            <code>RUN --mount=type=secret,id=secret.txt</code> to access an API
+            key during the build process, create a configuration file with a
+            hash of the secret, but without including the actual secret in any
+            image layer.
+          </p>
+
+          <pre><code># Test 1: Verify the secret was actually used during build
+# Expected: Shows config file created using the secret, with API key hash and timestamp
+# What happens: Proves the secret was accessible and used to generate build-time artifacts
+echo "=== Verify secret was used during build ==="
+docker run --rm --entrypoint cat dockerfile-demo:secrets /app/config.txt
+echo ""
+
+# Test 2: Verify the secret hash matches our original secret
+# Expected: Hash should match the SHA256 of our original secret content
+# What happens: Confirms the secret was correctly read and processed during build
+echo "=== Verify secret hash matches original ==="
+echo "Expected hash: $(echo -n 'my-secret-key-123' | sha256sum | cut -d' ' -f1)"
+echo "Container hash: $(docker run --rm --entrypoint grep dockerfile-demo:secrets 'api_key_hash' /app/config.txt | cut -d'=' -f2)"
+echo ""
+
+# Test 3: Search for secret files by name
+# Expected: No secret files found (exit code != 0), so "✅ No secret files found" message
+# What happens: find command searches entire filesystem for any secret-related files
+echo "=== Verify no secret files remain ==="
+docker run --rm --entrypoint find dockerfile-demo:secrets / -name "*secret*" 2>/dev/null || echo "✅ No secret files found in image"
+echo ""
+
+# Test 4: Check build logs to see secret was processed
+# Expected: Should show "Build completed with secret (length: 17 characters)"
+# What happens: Demonstrates the secret was available and its length was calculated
+echo "=== Check build evidence ==="
+docker run --rm dockerfile-demo:secrets echo "Build completed successfully - check config file for evidence of secret processing"
+echo ""</code></pre>
+
+          <p>
+            <strong>Key Learning Points:</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>Secret was processed:</strong> Config file shows hash of
+              the secret, proving it was accessible during build
+            </li>
+            <li>
+              <strong>Hash verification works:</strong> We can verify the secret
+              was correctly read by comparing hashes
+            </li>
+            <li>
+              <strong>Original secret is secure:</strong> The actual secret
+              content doesn't appear anywhere in the final image
+            </li>
+            <li>
+              <strong>Build artifacts remain:</strong> We can create files using
+              secrets without exposing the secrets themselves
+            </li>
+            <li>
+              <strong>Security best practice:</strong> Sensitive data processed
+              during build but not leaked into production images
+            </li>
+          </ul>
+
+          <h6>Testing BuildKit Advanced Features</h6>
+          <p>
+            <strong>Understanding Docker Metadata and Layers:</strong>
+            Every Docker image contains metadata (labels, configuration) and is
+            composed of layers representing each instruction in the Dockerfile.
+            BuildKit provides enhanced inspection capabilities to examine these
+            details.
+          </p>
+
+          <pre><code># Test 1: Examine image metadata and labels
+# Expected: Shows labels defined in Dockerfile (like org.opencontainers.image.authors)
+# What happens: docker inspect extracts metadata, jq formats the Labels section
+echo "=== Container metadata and labels ==="
+docker inspect dockerfile-demo:default | jq '.[0].Config.Labels'
+echo ""
+
+# Test 2: Examine build history and layer details
+# Expected: Shows each Dockerfile instruction as a separate layer with details
+# What happens: docker history reveals how the image was built, layer by layer
+echo "=== Build history and layers ==="
+docker history dockerfile-demo:default --no-trunc
+echo ""
+
+# Test 3: Compare layer counts between different builds
+# Expected: Both images should have similar layer counts (same Dockerfile structure)
+# What happens: wc -l counts the number of layers, showing build consistency
+echo "=== Compare layer differences between builds ==="
+echo "Default build layers:"
+docker history dockerfile-demo:default | wc -l
+echo "Node18 build layers:"
+docker history dockerfile-demo:node18 | wc -l
+echo ""</code></pre>
+
+          <p>
+            <strong>Key Learning Points:</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>Metadata is preserved:</strong> Labels and configuration
+              survive in the final image
+            </li>
+            <li>
+              <strong>Layer visibility:</strong> Each Dockerfile instruction
+              creates a traceable layer
+            </li>
+            <li>
+              <strong>Build consistency:</strong> Same Dockerfile produces same
+              layer structure regardless of ARG values
+            </li>
+            <li>
+              <strong>Inspection tools:</strong> docker inspect and docker
+              history provide deep image insights
+            </li>
+          </ul>
+
+          <p>
+            <strong>Key Learning Points:</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>Feature integration:</strong> Multiple Dockerfile
+              instructions work together seamlessly
+            </li>
+            <li>
+              <strong>Container nesting:</strong> Can run containers within
+              container commands for complex operations
+            </li>
+            <li>
+              <strong>Build-time vs runtime:</strong> ARG affects build, ENV
+              affects runtime, secrets affect neither
+            </li>
+            <li>
+              <strong>Practical validation:</strong> Real-world testing confirms
+              all features function as designed
+            </li>
+          </ul>
+
+          <h4>Key Dockerfile Instructions Explained</h4>
+
+          <h5>Dockerfile Directives (Optional)</h5>
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># syntax=docker/dockerfile:1.5    # Specifies Dockerfile syntax version
+# escape=\                         # Changes escape character (default is \)</code></pre>
+          </div>
+          <p>
+            <strong>Purpose:</strong> Enable advanced BuildKit features and
+            customize parsing behavior
+          </p>
+
+          <h5><code>ARG</code> - Build-Time Variables</h5>
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code>ARG BASE_IMAGE_TAG=19.4
+FROM node:${BASE_IMAGE_TAG}</code></pre>
+          </div>
+          <p><strong>Key points:</strong></p>
+          <ul>
+            <li>Only instruction allowed before <code>FROM</code></li>
+            <li>
+              Can be overridden:
+              <code>docker build --build-arg BASE_IMAGE_TAG=18.19</code>
+            </li>
+            <li>Values visible in image metadata - don't use for secrets!</li>
+          </ul>
+
+          <h5><code>FROM</code> - Base Image Selection</h5>
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code>FROM node:${BASE_IMAGE_TAG}</code></pre>
+          </div>
+          <p><strong>Best practices:</strong></p>
+          <ul>
+            <li>
+              <strong>Pin specific versions:</strong>
+              <code>node:19.4-bullseye-slim</code> not <code>node:latest</code>
+            </li>
+            <li>
+              <strong>Use minimal variants:</strong> <code>-slim</code>,
+              <code>-alpine</code> for smaller images
+            </li>
+            <li>
+              <strong>Consider security:</strong> Chainguard, distroless images
+              for production
+            </li>
+          </ul>
+
+          <h5><code>LABEL</code> - Image Metadata</h5>
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code>LABEL org.opencontainers.image.authors="ccdc-team@coastline.edu"
+LABEL org.opencontainers.image.description="CCDC Training Container"
+LABEL version="1.0"</code></pre>
+          </div>
+          <p>
+            <strong>Common labels:</strong> Authors, description, version,
+            source repository
+          </p>
+
+          <h5><code>RUN</code> - Executing Commands</h5>
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Shell form (runs in /bin/sh -c)
+RUN echo "Hey Team 👋"
+
+# Exec form (direct execution, no shell)
+RUN ["echo", "Hey Team 👋"]
+
+# Heredoc syntax (multi-line commands)
+RUN &lt;&lt;EOT
+apt update
+apt install iputils-ping -y
+apt clean
+EOT</code></pre>
+          </div>
+          <p><strong>Optimization techniques:</strong></p>
+          <ul>
+            <li>
+              <strong>Chain commands:</strong>
+              <code>RUN apt update && apt install curl && apt clean</code>
+            </li>
+            <li><strong>Use heredocs:</strong> Cleaner multi-line commands</li>
+            <li>
+              <strong>Cache mounts:</strong>
+              <code>RUN --mount=type=cache,target=/var/cache/apt</code>
+            </li>
+          </ul>
+
+          <h5><code>ENV</code> vs <code>ARG</code> - Environment Variables</h5>
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Build-time only (but visible in metadata)
+ARG BUILD_ARG=foo
+
+# Build and runtime
+ENV ENV_VAR=bar
+ENV NODE_ENV=production</code></pre>
+          </div>
+          <p><strong>Key differences:</strong></p>
+          <ul>
+            <li>
+              <code>ARG</code>: Build-time only, can be overridden with
+              <code>--build-arg</code>
+            </li>
+            <li>
+              <code>ENV</code>: Available at build and runtime, persists in
+              final image
+            </li>
+          </ul>
+
+          <h5><code>WORKDIR</code> - Working Directory</h5>
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code>WORKDIR /app                    # Sets working directory
+WORKDIR /usr/src/app           # Node.js convention
+WORKDIR /opt/app               # Java convention</code></pre>
+          </div>
+          <p>
+            <strong>Benefits:</strong> Creates directory if it doesn't exist,
+            sets context for subsequent instructions
+          </p>
+
+          <h5>
+            <code>ENTRYPOINT</code> vs <code>CMD</code> - Container Startup
+          </h5>
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code>ENTRYPOINT [ "echo", "Hey Team 👋 (entrypoint)" ]
+CMD [ "+ (cmd)" ]</code></pre>
+          </div>
+          <p><strong>Behavior:</strong></p>
+          <ul>
+            <li>
+              <code>ENTRYPOINT</code>: Always executed, cannot be overridden
+            </li>
+            <li>
+              <code>CMD</code>: Provides default arguments, can be overridden
+            </li>
+            <li>
+              <strong>Combined:</strong>
+              <code>ENTRYPOINT + CMD = complete command</code>
+            </li>
+          </ul>
+
+          <h4>Cleanup</h4>
+          <pre><code># Clean up demo images and files
+cd ~
+docker rmi dockerfile-demo:default dockerfile-demo:node18 dockerfile-demo:secrets
+docker rmi secret-demo multistage-demo
+rm -rf dockerfile-fundamentals
+rm secret.txt
+docker system prune -af
+</code></pre>
+
+          <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading">🔐 CCDC Security Best Practices</h5>
+            <p><strong>Key takeaways for competition environments:</strong></p>
+            <ul class="mb-2">
+              <li>
+                <strong>Secrets:</strong> Use
+                <code>--mount=type=secret</code> for build-time credentials
+              </li>
+              <li>
+                <strong>Base images:</strong> Pin specific versions and use
+                minimal variants
+              </li>
+              <li>
+                <strong>Metadata:</strong> <code>LABEL</code> for documentation
+                and compliance
+              </li>
+              <li>
+                <strong>Environment:</strong> <code>ENV</code> for runtime
+                config, avoid <code>ARG</code> for secrets
+              </li>
+              <li>
+                <strong>Startup:</strong> <code>ENTRYPOINT</code> for consistent
+                behavior, <code>CMD</code> for flexibility
+              </li>
+            </ul>
+            <p class="mb-0">
+              These patterns ensure secure, maintainable containers that perform
+              well under CCDC competition pressure.
+            </p>
+          </div>
+
+          <hr />
+
+          <h2>4. Containerizing the Node.js API Server</h2>
+          <p>
+            Now let's apply Dockerfile best practices by containerizing our
+            Node.js API server. We'll start with a basic approach and
+            progressively improve it, learning key containerization techniques
+            used in CCDC environments.
+          </p>
+
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-play-circle-fill"></i> Hands-On Exercise: API
+              Containerization
+            </h4>
+            <p>
+              We'll create 10 different versions of the API Dockerfile, each
+              building on the previous one. This progressive approach helps you
+              understand why each optimization matters and when to apply
+              specific techniques.
+            </p>
+          </div>
+
+          <h3>Step 1: Basic Dockerfile (Naive Approach)</h3>
+          <p>
+            Let's start with the simplest possible Dockerfile to get our API
+            running in a container:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.basic - Simple but problematic approach
+FROM node
+
+COPY . .
+
+RUN npm install
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Building and Testing the Basic Version</h4>
+          <pre><code># Navigate to your API directory
+cd api-node
+
+# Create the basic Dockerfile
+cat > Dockerfile &lt;&lt; 'EOF'
+FROM node
+
+COPY . .
+
+RUN npm install
+
+CMD [ "node", "src/index.js" ]
+EOF
+
+# Build the image
+docker build -t api-node:basic .
+
+# Run the container (won't work yet - we need database)
+docker run -p 3000:3000 api-node:basic</code></pre>
+
+          <p><strong>Problems with this approach:</strong></p>
+          <ul>
+            <li>
+              ❌ <strong>Unpinned base image:</strong> <code>node</code> tag
+              changes over time
+            </li>
+            <li>
+              ❌ <strong>Large image size:</strong> Full Node.js image includes
+              unnecessary tools
+            </li>
+            <li>
+              ❌ <strong>Security risk:</strong> Running as root user inside
+              container
+            </li>
+            <li>
+              ❌ <strong>Poor caching:</strong> Copying all files first means
+              cache misses on code changes
+            </li>
+            <li>
+              ❌ <strong>Includes development files:</strong>
+              <code>node_modules</code>, <code>.git</code>, etc.
+            </li>
+          </ul>
+
+          <h3>Step 2: Pin Specific Versions</h3>
+          <p>
+            Let's fix the unpredictable base image issue by pinning a specific
+            version:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.pinned - Pin specific version and use slim variant
+FROM node:19.6-bullseye-slim
+
+COPY . .
+
+RUN npm install
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Building and Comparing Sizes</h4>
+          <pre><code># Build the improved version
+docker build -f Dockerfile.pinned -t api-node:pinned .
+
+# Compare image sizes
+docker images | grep api-node
+
+# You should see a significant size reduction with the slim variant</code></pre>
+
+          <p><strong>Improvements made:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Pinned version:</strong>
+              <code>node:19.6-bullseye-slim</code> ensures consistent builds
+            </li>
+            <li>
+              ✅ <strong>Smaller base image:</strong> <code>-slim</code> variant
+              reduces image size by ~50%
+            </li>
+            <li>
+              ✅ <strong>Debian Bullseye:</strong> Stable, well-supported base
+              OS
+            </li>
+          </ul>
+
+          <h3>Step 3: Set Proper Working Directory</h3>
+          <p>
+            Following Node.js conventions, let's set an appropriate working
+            directory:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.workdir - Add proper working directory
+FROM node:19.6-bullseye-slim
+
+# Set working directory following Node.js conventions
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN npm install
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Testing the Working Directory</h4>
+          <pre><code># Build and test
+docker build -f Dockerfile.workdir -t api-node:workdir .
+
+# Run container and examine the working directory
+docker run --rm api-node:workdir pwd
+# Output: /usr/src/app
+
+# Check file organization
+docker run --rm api-node:workdir ls -la</code></pre>
+
+          <p><strong>Benefits of proper WORKDIR:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Organized file system:</strong> Application files in
+              standard location
+            </li>
+            <li>
+              ✅ <strong>Easier debugging:</strong> Predictable paths when
+              troubleshooting
+            </li>
+            <li>
+              ✅ <strong>Convention compliance:</strong> Follows Node.js
+              deployment standards
+            </li>
+            <li>
+              ✅ <strong>Safer operations:</strong> Avoids cluttering root
+              directory
+            </li>
+          </ul>
+
+          <h3>Step 4: Optimize Layer Caching</h3>
+          <p>
+            Now let's dramatically improve build times by optimizing Docker's
+            layer caching:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.cache - Optimize layer caching for dependencies
+FROM node:19.6-bullseye-slim
+
+WORKDIR /usr/src/app
+
+# Copy only package files first (better layer caching)
+COPY package*.json ./
+
+# Install dependencies in separate layer
+RUN npm install
+
+# Copy source code AFTER dependencies are installed
+COPY ./src/ ./src/
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Testing Cache Optimization</h4>
+          <pre><code># Build initial version
+docker build -f Dockerfile.cache -t api-node:cache .
+
+# Make a small change to source code
+echo '// Updated comment' >> src/index.js
+
+# Rebuild and observe cache usage
+docker build -f Dockerfile.cache -t api-node:cache .
+# Notice: "Using cache" messages for dependency installation</code></pre>
+
+          <p><strong>Layer caching benefits:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Faster rebuilds:</strong> Dependencies cached when only
+              source changes
+            </li>
+            <li>
+              ✅ <strong>Efficient CI/CD:</strong> Build pipelines complete
+              faster
+            </li>
+            <li>
+              ✅ <strong>Reduced bandwidth:</strong> Layer reuse across images
+            </li>
+            <li>
+              ✅ <strong>Better developer experience:</strong> Quick iteration
+              during development
+            </li>
+          </ul>
+
+          <h3>Step 5: Security Hardening with Non-Root User</h3>
+          <p>
+            Security is critical in CCDC environments. Let's switch to a
+            non-root user:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.security - Add non-root user for security
+FROM node:19.6-bullseye-slim
+
+WORKDIR /usr/src/app
+
+# Copy package files and install dependencies as root
+COPY package*.json ./
+RUN npm install
+
+# Switch to non-root user BEFORE copying source code
+USER node
+
+# Copy source code with proper ownership
+COPY --chown=node:node ./src/ ./src/
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Testing Security Configuration</h4>
+          <pre><code># Build and test user configuration
+docker build -f Dockerfile.security -t api-node:security .
+
+# Verify running user
+docker run --rm api-node:security whoami
+# Output: node
+
+# Check file permissions
+docker run --rm api-node:security ls -la src/
+# Files should be owned by node:node</code></pre>
+
+          <p><strong>Security improvements:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Non-root execution:</strong> Reduces privilege
+              escalation risks
+            </li>
+            <li>
+              ✅ <strong>Proper file ownership:</strong>
+              <code>--chown=node:node</code> ensures correct permissions
+            </li>
+            <li>
+              ✅ <strong>Defense in depth:</strong> Additional security layer
+              even with container isolation
+            </li>
+            <li>
+              ✅ <strong>CCDC compliance:</strong> Follows security competition
+              best practices
+            </li>
+          </ul>
+
+          <h3>Step 6: Production Environment Optimization</h3>
+          <p>
+            Let's optimize for production by installing only necessary
+            dependencies:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.production - Production environment optimizations
+FROM node:19.6-bullseye-slim
+
+# Set NODE_ENV for production optimizations
+ENV NODE_ENV=production
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+USER node
+
+COPY --chown=node:node ./src/ ./src/
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Comparing Development vs Production Builds</h4>
+          <pre><code># Build production version
+docker build -f Dockerfile.production -t api-node:production .
+
+# Compare dependency counts
+docker run --rm api-node:cache ls node_modules | wc -l
+docker run --rm api-node:production ls node_modules | wc -l
+# Production should have fewer dependencies
+
+# Compare image sizes
+docker images | grep api-node</code></pre>
+
+          <p><strong>Production optimizations:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>NODE_ENV=production:</strong> Enables Node.js
+              performance optimizations
+            </li>
+            <li>
+              ✅ <strong>npm ci --only=production:</strong> Excludes development
+              dependencies
+            </li>
+            <li>
+              ✅ <strong>Smaller attack surface:</strong> Fewer packages means
+              fewer vulnerabilities
+            </li>
+            <li>
+              ✅ <strong>Faster startup:</strong> Less code to load and parse
+            </li>
+          </ul>
+
+          <h3>Step 7: Port Documentation and Service Discovery</h3>
+          <p>
+            Document the expected port to help with service discovery and
+            deployment:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.ports - Document expected ports
+FROM node:19.6-bullseye-slim
+
+ENV NODE_ENV=production
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+USER node
+
+COPY --chown=node:node ./src/ ./src/
+
+# Document the port this service uses
+EXPOSE 3000
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Testing Port Configuration</h4>
+          <pre><code># Build and run with explicit port mapping
+docker build -f Dockerfile.ports -t api-node:ports .
+
+# Run with port mapping
+docker run -d -p 3000:3000 --name api-test api-node:ports
+
+# Test the API
+curl http://localhost:3000/ping
+# Expected: pong
+
+# Clean up
+docker stop api-test && docker rm api-test</code></pre>
+
+          <p><strong>Port documentation benefits:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Clear service interface:</strong> Developers know which
+              ports to map
+            </li>
+            <li>
+              ✅ <strong>Container orchestration:</strong> Tools like Kubernetes
+              can discover ports
+            </li>
+            <li>
+              ✅ <strong>Documentation:</strong> Self-documenting infrastructure
+            </li>
+            <li>
+              ✅ <strong>CCDC deployment:</strong> Easier service configuration
+              in competitions
+            </li>
+          </ul>
+
+          <h3>Step 8: Build Performance with Cache Mounts</h3>
+          <p>
+            Use modern Docker BuildKit features to speed up dependency
+            installation:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.buildkit - Use BuildKit cache mounts
+FROM node:19.6-bullseye-slim
+
+ENV NODE_ENV=production
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+# Use cache mount to speed up npm installs
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+    npm set cache /usr/src/app/.npm && \
+    npm ci --only=production
+
+USER node
+
+COPY --chown=node:node ./src/ ./src/
+
+EXPOSE 3000
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Testing Cache Mount Performance</h4>
+          <pre><code># Ensure BuildKit is enabled
+export DOCKER_BUILDKIT=1
+
+# Build initial version
+docker build -f Dockerfile.buildkit -t api-node:buildkit .
+
+# Clean and rebuild to test cache performance
+docker system prune -f
+docker build -f Dockerfile.buildkit -t api-node:buildkit .
+# Subsequent builds should reuse npm cache</code></pre>
+
+          <p><strong>Cache mount advantages:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Persistent caches:</strong> npm cache survives
+              container rebuilds
+            </li>
+            <li>
+              ✅ <strong>Faster CI/CD:</strong> Shared caches across build
+              stages
+            </li>
+            <li>
+              ✅ <strong>Reduced bandwidth:</strong> Packages downloaded once,
+              cached indefinitely
+            </li>
+            <li>
+              ✅ <strong>Modern Docker features:</strong> Uses latest BuildKit
+              capabilities
+            </li>
+          </ul>
+
+          <h3>Step 9: Health Check Integration</h3>
+          <p>
+            Add health check capabilities for better monitoring and
+            orchestration:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.healthcheck - Add health check support
+FROM node:19.6-bullseye-slim
+
+ENV NODE_ENV=production
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+    npm set cache /usr/src/app/.npm && \
+    npm ci --only=production
+
+USER node
+
+# Copy health check script
+COPY --chown=node:node ./healthcheck/ ./healthcheck/
+
+# Copy source code
+COPY --chown=node:node ./src/ ./src/
+
+EXPOSE 3000
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Creating a Health Check Script</h4>
+          <pre><code># Create healthcheck directory and script
+mkdir -p healthcheck
+
+cat > healthcheck/healthcheck.js &lt;&lt; 'EOF'
+var http = require('http');
+
+var options = {
+  timeout: 2000,
+  host: 'localhost',
+  port: process.env.PORT || 3000,
+  path: '/ping',
+};
+
+var request = http.request(options, (res) => {
+  console.info('STATUS: ' + res.statusCode);
+  process.exitCode = res.statusCode === 200 ? 0 : 1;
+  process.exit();
+});
+
+request.on('error', function (err) {
+  console.error('ERROR', err);
+  process.exit(1);
+});
+
+request.end();
+EOF
+
+# Build and test health check
+docker build -f Dockerfile.healthcheck -t api-node:healthcheck .
+
+# Run with health check
+docker run -d -p 3000:3000 --name api-health api-node:healthcheck
+
+# Test health check manually
+docker exec api-health node healthcheck/healthcheck.js
+
+# Clean up
+docker stop api-health && docker rm api-health</code></pre>
+
+          <p><strong>Health check benefits:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Container orchestration:</strong> Kubernetes and Docker
+              Swarm can monitor health
+            </li>
+            <li>
+              ✅ <strong>Automated recovery:</strong> Unhealthy containers can
+              be restarted
+            </li>
+            <li>
+              ✅ <strong>Load balancer integration:</strong> Traffic routing
+              based on health status
+            </li>
+            <li>
+              ✅ <strong>CCDC monitoring:</strong> Quick service status
+              verification during competitions
+            </li>
+          </ul>
+
+          <h3>Step 10: Multi-Stage Builds (Development and Production)</h3>
+          <p>
+            Create a flexible Dockerfile that supports both development and
+            production builds:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.multistage - Multi-stage build for dev and production
+FROM node:19.6-bullseye-slim AS base
+
+WORKDIR /usr/src/app
+
+# Copy package files (shared between stages)
+COPY package*.json ./
+
+# Development stage
+FROM base AS development
+
+# Install all dependencies (including dev dependencies)
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+    npm set cache /usr/src/app/.npm && \
+    npm install
+
+# Copy all source code for development
+COPY . .
+
+# Development command with hot reload
+CMD ["npm", "run", "dev"]
+
+# Production stage
+FROM base AS production
+
+# Set production environment
+ENV NODE_ENV=production
+
+# Install only production dependencies
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+    npm set cache /usr/src/app/.npm && \
+    npm ci --only=production
+
+# Switch to non-root user
+USER node
+
+# Copy health check script
+COPY --chown=node:node ./healthcheck/ ./healthcheck/
+
+# Copy only source code needed for production
+COPY --chown=node:node ./src/ ./src/
+
+EXPOSE 3000
+
+CMD [ "node", "src/index.js" ]</code></pre>
+          </div>
+
+          <h4>Building Different Targets</h4>
+          <pre><code># Build development version
+docker build -f Dockerfile.multistage --target development -t api-node:dev .
+
+# Build production version (default)
+docker build -f Dockerfile.multistage --target production -t api-node:prod .
+
+# Compare image sizes and dependencies
+docker images | grep api-node
+docker run --rm api-node:dev ls node_modules | wc -l
+docker run --rm api-node:prod ls node_modules | wc -l
+
+# Test development mode with hot reload
+docker run -v $(pwd)/src:/usr/src/app/src -p 3000:3000 api-node:dev</code></pre>
+
+          <p><strong>Multi-stage build advantages:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Single Dockerfile:</strong> Maintains both development
+              and production configurations
+            </li>
+            <li>
+              ✅ <strong>Optimized images:</strong> Production images only
+              include necessary dependencies
+            </li>
+            <li>
+              ✅ <strong>Development features:</strong> Hot reload and debugging
+              tools in development
+            </li>
+            <li>
+              ✅ <strong>Flexible deployment:</strong> Choose target based on
+              environment needs
+            </li>
+          </ul>
+
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">✅ API Containerization Complete</h4>
+            <p>You've successfully learned how to:</p>
+            <ul class="mb-2">
+              <li>Create basic Dockerfiles and identify common problems</li>
+              <li>Apply security best practices with non-root users</li>
+              <li>
+                Optimize build performance with layer caching and cache mounts
+              </li>
+              <li>
+                Configure production environments with proper dependencies
+              </li>
+              <li>Implement health checks for monitoring and orchestration</li>
+              <li>Use multi-stage builds for flexible development workflows</li>
+            </ul>
+            <p class="mb-0">
+              <strong>Next:</strong> We'll apply these same principles to
+              containerize the React frontend with additional considerations for
+              static asset serving.
+            </p>
+          </div>
+
+          <hr />
+
+          <h2>5. Containerizing the React Frontend</h2>
+          <p>
+            Frontend containerization presents unique challenges: we need to
+            build the application for production and serve static assets
+            efficiently. Let's containerize our React application using a
+            progressive approach that addresses these requirements.
+          </p>
+
+          <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-info-circle-fill"></i> Frontend Containerization
+              Strategy
+            </h4>
+            <p>
+              Unlike backend services that run continuously, React applications
+              need to be:
+            </p>
+            <ul class="mb-2">
+              <li>
+                <strong>Built into static assets:</strong> HTML, CSS, and
+                JavaScript files
+              </li>
+              <li>
+                <strong>Served by a web server:</strong> Nginx for production
+                performance
+              </li>
+              <li>
+                <strong>Configured for API routing:</strong> Proxy API requests
+                to backend
+              </li>
+              <li>
+                <strong>Optimized for caching:</strong> Static assets can be
+                heavily cached
+              </li>
+            </ul>
+            <p class="mb-0">
+              We'll progress from a simple development setup to a
+              production-ready multi-stage build.
+            </p>
+          </div>
+
+          <h3>Step 1: Basic Development Container</h3>
+          <p>
+            Let's start with a simple development container that runs the Vite
+            dev server:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.dev - Basic development container
+FROM node
+
+COPY . .
+
+RUN npm install
+
+CMD ["npm", "run", "dev"]</code></pre>
+          </div>
+
+          <h4>Building and Testing Development Container</h4>
+          <pre><code># Navigate to the React client directory
+cd client-react
+
+# Create basic development Dockerfile
+cat > Dockerfile.dev &lt;&lt; 'EOF'
+FROM node
+
+COPY . .
+
+RUN npm install
+
+CMD ["npm", "run", "dev"]
+EOF
+
+# Build the development image
+docker build -f Dockerfile.dev -t client-react:dev .
+
+# Run with port mapping and host binding
+docker run -p 5173:5173 --name react-dev client-react:dev
+
+# Test the application
+curl http://localhost:5173
+# Should see the React application HTML</code></pre>
+
+          <p><strong>Development container characteristics:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Quick to build:</strong> Simple approach for
+              development
+            </li>
+            <li>
+              ✅ <strong>Hot reload:</strong> Vite provides instant updates
+            </li>
+            <li>
+              ❌ <strong>Large image:</strong> Full Node.js image with all
+              dependencies
+            </li>
+            <li>
+              ❌ <strong>Not production-ready:</strong> Development server not
+              optimized for production
+            </li>
+          </ul>
+
+          <h3>Step 2: Pin Versions and Optimize Base Image</h3>
+          <p>Apply version pinning and use a more appropriate base image:</p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.pinned - Pin Node.js version
+FROM node:19.4-bullseye
+
+COPY . .
+
+RUN npm install
+
+CMD ["npm", "run", "dev"]</code></pre>
+          </div>
+
+          <h4>Testing Version Pinning</h4>
+          <pre><code># Build with pinned version
+docker build -f Dockerfile.pinned -t client-react:pinned .
+
+# Verify Node.js version consistency
+docker run --rm client-react:pinned node --version
+# Should output: v19.4.x
+
+# Compare image sizes
+docker images | grep client-react</code></pre>
+
+          <p><strong>Version pinning benefits for frontend:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Consistent builds:</strong> Same Node.js version across
+              environments
+            </li>
+            <li>
+              ✅ <strong>Vite compatibility:</strong> Ensures build tool
+              compatibility
+            </li>
+            <li>
+              ✅ <strong>Reproducible deployments:</strong> Eliminates "works on
+              my machine" issues
+            </li>
+          </ul>
+
+          <h3>Step 3: Multi-Stage Build Foundation</h3>
+          <p>
+            Prepare for production by introducing multi-stage builds and proper
+            working directory:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.multistage-prep - Prepare for multi-stage build
+FROM node:19.4-bullseye AS build
+
+# Set proper working directory
+WORKDIR /usr/src/app
+
+# Copy package files for better caching
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+# This is still running in development mode
+CMD ["npm", "run", "dev"]</code></pre>
+          </div>
+
+          <h4>Testing Multi-Stage Preparation</h4>
+          <pre><code># Build with multi-stage foundation
+docker build -f Dockerfile.multistage-prep -t client-react:multistage-prep .
+
+# Test the build foundation
+docker run -p 5173:5173 --name react-prep client-react:multistage-prep
+
+# Verify working directory
+docker exec react-prep pwd
+# Output: /usr/src/app</code></pre>
+
+          <p><strong>Multi-stage preparation improvements:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Build stage naming:</strong>
+              <code>AS build</code> prepares for production stage
+            </li>
+            <li>
+              ✅ <strong>Working directory:</strong> Organized file structure
+            </li>
+            <li>
+              ✅ <strong>Layer optimization:</strong> Package files copied first
+            </li>
+            <li>
+              ✅ <strong>Foundation for production:</strong> Ready for nginx
+              serving stage
+            </li>
+          </ul>
+
+          <h3>Step 4: Cache Optimization</h3>
+          <p>Add cache mount optimization for faster builds:</p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.cache - Add cache mount optimization
+FROM node:19.4-bullseye AS build
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+# Use cache mount for npm dependencies
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+    npm set cache /usr/src/app/.npm && \
+    npm install
+
+COPY . .
+
+CMD ["npm", "run", "dev"]</code></pre>
+          </div>
+
+          <h4>Testing Cache Performance</h4>
+          <pre><code># Ensure BuildKit is enabled
+export DOCKER_BUILDKIT=1
+
+# Build with cache optimization
+docker build -f Dockerfile.cache -t client-react:cache .
+
+# Modify source code and rebuild to test cache
+echo '// Cache test' >> src/App.jsx
+docker build -f Dockerfile.cache -t client-react:cache .
+# Should see cache hits for npm install</code></pre>
+
+          <p><strong>Cache optimization for frontend builds:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Faster dependency installation:</strong> npm packages
+              cached across builds
+            </li>
+            <li>
+              ✅ <strong>CI/CD optimization:</strong> Build pipelines complete
+              faster
+            </li>
+            <li>
+              ✅ <strong>Development efficiency:</strong> Quick rebuilds during
+              development
+            </li>
+          </ul>
+
+          <h3>Step 5: Production Multi-Stage Build</h3>
+          <p>
+            Now let's create a true production build with Nginx serving static
+            assets:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.production - Full production multi-stage build
+FROM node:19.4-bullseye AS build
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+# Install dependencies with cache mount
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+    npm set cache /usr/src/app/.npm && \
+    npm install
+
+COPY . .
+
+# Build for production
+RUN npm run build
+
+# Production stage with Nginx
+FROM nginxinc/nginx-unprivileged:1.23-alpine-perl
+
+# Copy Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built static files from build stage
+COPY --from=build /usr/src/app/dist/ /usr/share/nginx/html
+
+# Nginx runs on port 8080 in unprivileged mode
+EXPOSE 8080</code></pre>
+          </div>
+
+          <h4>Creating Nginx Configuration</h4>
+          <p>
+            The React application needs an Nginx configuration that handles
+            routing and API proxying:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Create nginx.conf for React application
+cat > nginx.conf &lt;&lt; 'EOF'
+server {
+    listen 8080;
+    
+    # Docker internal DNS resolver
+    resolver 127.0.0.11;
+    
+    # Health check endpoint
+    location /ping {
+        access_log off;
+        add_header 'Content-Type' 'text/plain';
+        return 200 "pong";
+    }
+    
+    # Proxy API requests to backend service
+    location /api/node/ {
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+
+        # Backend service endpoint (Docker networking)
+        set $api_node_upstream http://api-node:3000/;
+        proxy_pass $api_node_upstream;
+    }
+    
+    # Serve React static files
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html =404;
+    }
+    
+    # Include any additional configurations
+    include /etc/nginx/extra-conf.d/*.conf;
+}
+EOF</code></pre>
+          </div>
+
+          <h4>Building and Testing Production Build</h4>
+          <pre><code># Build production image
+docker build -f Dockerfile.production -t client-react:production .
+
+# Compare image sizes
+docker images | grep client-react
+# Production image should be much smaller
+
+# Test production container
+docker run -p 8080:8080 --name react-prod client-react:production
+
+# Test static serving
+curl http://localhost:8080/ping
+# Expected: pong
+
+curl -I http://localhost:8080/
+# Should see HTML content type
+
+# Clean up
+docker stop react-prod && docker rm react-prod</code></pre>
+
+          <p><strong>Production build advantages:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>Small image size:</strong> Only nginx and static files
+              in final image
+            </li>
+            <li>
+              ✅ <strong>Production performance:</strong> Nginx optimized for
+              static file serving
+            </li>
+            <li>
+              ✅ <strong>API proxying:</strong> Handles backend API routing
+            </li>
+            <li>✅ <strong>Security:</strong> Unprivileged nginx user</li>
+            <li>✅ <strong>Health checks:</strong> Built-in /ping endpoint</li>
+          </ul>
+
+          <h3>Step 6: Advanced Optimizations</h3>
+          <p>
+            Apply the latest Docker optimizations including
+            <code>--link</code> for improved cache behavior:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Dockerfile.optimized - Advanced optimizations
+# syntax=docker/dockerfile:1.5
+
+FROM node:19.4-bullseye AS build
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+# Install dependencies with cache mount
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+    npm set cache /usr/src/app/.npm && \
+    npm install
+
+COPY . .
+
+# Build for production
+RUN npm run build
+
+# Production stage with Nginx
+FROM nginxinc/nginx-unprivileged:1.23-alpine-perl
+
+# Use COPY --link to avoid breaking cache if we change the base image
+COPY --link nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy static files with --link optimization
+COPY --link --from=build /usr/src/app/dist/ /usr/share/nginx/html
+
+EXPOSE 8080</code></pre>
+          </div>
+
+          <h4>Testing Advanced Optimizations</h4>
+          <pre><code># Build optimized version
+docker build -f Dockerfile.optimized -t client-react:optimized .
+
+# Test the optimized container
+docker run -p 8080:8080 --name react-optimized client-react:optimized
+
+# Verify functionality
+curl http://localhost:8080/ping
+curl -I http://localhost:8080/
+
+# Test cache behavior with base image changes
+# (Advanced: try changing the nginx base image tag)
+
+# Clean up
+docker stop react-optimized && docker rm react-optimized</code></pre>
+
+          <p><strong>Advanced optimization benefits:</strong></p>
+          <ul>
+            <li>
+              ✅ <strong>COPY --link:</strong> Independent cache layers for
+              better reuse
+            </li>
+            <li>
+              ✅ <strong>BuildKit syntax:</strong> Uses latest Docker features
+            </li>
+            <li>
+              ✅ <strong>Improved cache invalidation:</strong> Changes to base
+              images don't affect static files
+            </li>
+            <li>
+              ✅ <strong>Build flexibility:</strong> Can change nginx version
+              without rebuilding assets
+            </li>
+          </ul>
+
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">✅ Frontend Containerization Complete</h4>
+            <p>You've successfully learned how to:</p>
+            <ul class="mb-2">
+              <li>
+                Create development containers with hot reload capabilities
+              </li>
+              <li>Apply version pinning and base image optimization</li>
+              <li>Implement multi-stage builds for production deployments</li>
+              <li>Configure Nginx for static file serving and API proxying</li>
+              <li>Use cache optimization techniques for faster builds</li>
+              <li>
+                Apply advanced Docker features like
+                <code>--link</code> optimization
+              </li>
+            </ul>
+            <p class="mb-0">
+              <strong>Next:</strong> We'll demonstrate how to run the complete
+              containerized application stack.
+            </p>
+          </div>
+
+          <hr />
+
+          <h2>6. Running the Complete Containerized Application</h2>
+          <p>
+            Now that we have containerized both the Node.js API and React
+            frontend, let's demonstrate how to run the complete application
+            using individual containers. This approach teaches the fundamentals
+            before moving to orchestration tools.
+          </p>
+
+          <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-exclamation-triangle-fill"></i> Single Container
+              Limitations
+            </h4>
+            <p>
+              Running containers individually works for learning, but has
+              limitations:
+            </p>
+            <ul class="mb-2">
+              <li>
+                <strong>Manual networking:</strong> Must create Docker networks
+                manually
+              </li>
+              <li>
+                <strong>Service discovery:</strong> Containers must know each
+                other's names
+              </li>
+              <li>
+                <strong>Startup order:</strong> Database must start before API
+              </li>
+              <li>
+                <strong>Configuration management:</strong> Environment variables
+                per container
+              </li>
+            </ul>
+            <p class="mb-0">
+              <strong>Note:</strong> In future weeks, we'll use Docker Compose
+              and Kubernetes to address these challenges.
+            </p>
+          </div>
+
+          <h3>Step 1: Create Docker Network</h3>
+          <p>
+            First, create a custom Docker network so our containers can
+            communicate:
+          </p>
+
+          <pre><code># Create a custom bridge network
+docker network create ccdc-app-network
+
+# Verify network creation
+docker network ls | grep ccdc-app-network
+
+# Inspect network configuration
+docker network inspect ccdc-app-network</code></pre>
+
+          <h3>Step 2: Start PostgreSQL Database</h3>
+          <p>
+            Start the PostgreSQL database container with proper network
+            configuration:
+          </p>
+
+          <pre><code># Start PostgreSQL with named container and custom network
+docker run -d \
+  --name postgres-db \
+  --network ccdc-app-network \
+  -e POSTGRES_PASSWORD=ccdc-password \
+  -e POSTGRES_DB=ccdc_app \
+  -v postgres-data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15.1-alpine
+
+# Wait for database to be ready
+sleep 10
+
+# Test database connectivity
+docker exec postgres-db psql -U postgres -d ccdc_app -c "SELECT version();"</code></pre>
+
+          <h3>Step 3: Build and Run API Container</h3>
+          <p>
+            Build the production API container and connect it to the database:
+          </p>
+
+          <pre><code># Navigate to API directory and build production image
+cd api-node
+docker build -f Dockerfile.multistage --target production -t api-node:production .
+
+# Run API container with database connection
+docker run -d \
+  --name api-node \
+  --network ccdc-app-network \
+  -e DATABASE_URL=postgres://postgres:ccdc-password@postgres-db:5432/ccdc_app \
+  -e PORT=3000 \
+  -p 3000:3000 \
+  api-node:production
+
+# Test API connectivity
+sleep 5
+curl http://localhost:3000/ping
+# Expected: pong
+
+curl http://localhost:3000/ | jq .
+# Expected: {"now": "...", "api": "node"}</code></pre>
+
+          <h3>Step 4: Build and Run Frontend Container</h3>
+          <p>
+            Build the production frontend container with API proxy
+            configuration:
+          </p>
+
+          <pre><code># Navigate to client directory and build production image
+cd ../client-react
+docker build -f Dockerfile.optimized -t client-react:production .
+
+# Run frontend container
+docker run -d \
+  --name client-react \
+  --network ccdc-app-network \
+  -p 8080:8080 \
+  client-react:production
+
+# Test frontend
+curl http://localhost:8080/ping
+# Expected: pong
+
+# Test API proxy through frontend
+curl http://localhost:8080/api/node/ | jq .
+# Expected: {"now": "...", "api": "node"}</code></pre>
+
+          <h3>Step 5: Complete Application Testing</h3>
+          <p>
+            Test the complete application stack to ensure all components work
+            together:
+          </p>
+
+          <pre><code># Test all services are running
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Test database connectivity
+docker exec postgres-db psql -U postgres -d ccdc_app -c "SELECT count(*) FROM pg_stat_activity;"
+
+# Test API health and functionality
+curl -f http://localhost:3000/ping || echo "API health check failed"
+curl -f http://localhost:3000/ || echo "API database query failed"
+
+# Test frontend serving
+curl -f http://localhost:8080/ping || echo "Frontend health check failed"
+curl -I http://localhost:8080/ | grep "200 OK" || echo "Frontend serving failed"
+
+# Test API proxy through frontend
+curl -f http://localhost:8080/api/node/ || echo "API proxy failed"
+
+# Test complete application in browser
+echo "Application URLs:"
+echo "Frontend: http://localhost:8080"
+echo "API Direct: http://localhost:3000"
+echo "API via Frontend: http://localhost:8080/api/node/"</code></pre>
+
+          <h3>Step 6: Monitor Application Logs</h3>
+          <p>
+            Monitor logs from all containers to understand application behavior:
+          </p>
+
+          <pre><code># View logs from all containers
+echo "=== Database Logs ==="
+docker logs postgres-db --tail 10
+
+echo "=== API Logs ==="
+docker logs api-node --tail 10
+
+echo "=== Frontend Logs ==="
+docker logs client-react --tail 10
+
+# Follow logs in real-time (use Ctrl+C to stop)
+docker logs -f api-node &
+docker logs -f client-react &
+
+# Test application while monitoring logs
+curl http://localhost:8080/api/node/
+curl http://localhost:8080/ping
+
+# Stop log following
+pkill -f "docker logs"</code></pre>
+
+          <h3>Step 7: Container Resource Monitoring</h3>
+          <p>Monitor resource usage of your containerized application:</p>
+
+          <pre><code># View resource usage statistics
+docker stats --no-stream postgres-db api-node client-react
+
+# Detailed container information
+docker inspect api-node | jq '.[0].State'
+docker inspect client-react | jq '.[0].NetworkSettings.Networks'
+
+# Check disk usage
+docker system df
+
+# View network connectivity
+docker network inspect ccdc-app-network | jq '.[0].Containers'</code></pre>
+
+          <h3>Step 8: Application Cleanup</h3>
+          <p>Clean up the containerized application when finished:</p>
+
+          <pre><code># Stop all application containers
+docker stop client-react api-node postgres-db
+
+# Remove containers
+docker rm client-react api-node postgres-db
+
+# Remove custom network
+docker network rm ccdc-app-network
+
+# Remove volumes (optional - this deletes database data)
+docker volume rm postgres-data
+
+# Clean up unused images (optional)
+docker image prune -f</code></pre>
+
+          <h3>Application Architecture Summary</h3>
+          <p>
+            Here's what we've accomplished with our containerized application:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn"><i class="bi bi-clipboard"></i></button>
+            <pre><code># Complete containerized application stack:
+
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   API Server    │    │   Database      │
+│   (Nginx)       │    │   (Node.js)     │    │   (PostgreSQL)  │
+│   Port: 8080    │    │   Port: 3000    │    │   Port: 5432    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │ Docker Network  │
+                    │ ccdc-app-network│
+                    └─────────────────┘
+
+Traffic Flow:
+1. Browser → http://localhost:8080 → Frontend Container (Nginx)
+2. Frontend → /api/node/ → API Container (Node.js)
+3. API → postgres://postgres-db:5432 → Database Container (PostgreSQL)
+4. Response flows back through the same path</code></pre>
+          </div>
+
+          <h4>Key Learning Points</h4>
+          <ul>
+            <li>
+              ✅ <strong>Container networking:</strong> Custom networks enable
+              service-to-service communication
+            </li>
+            <li>
+              ✅ <strong>Service discovery:</strong> Containers can reference
+              each other by name
+            </li>
+            <li>
+              ✅ <strong>Environment configuration:</strong> Database URLs and
+              ports configured via environment variables
+            </li>
+            <li>
+              ✅ <strong>Port mapping:</strong> Host ports mapped to container
+              ports for external access
+            </li>
+            <li>
+              ✅ <strong>Data persistence:</strong> PostgreSQL data persisted
+              using Docker volumes
+            </li>
+            <li>
+              ✅ <strong>Health monitoring:</strong> Health check endpoints
+              available for monitoring
+            </li>
+          </ul>
+
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">🎉 Complete Containerization Success!</h4>
+            <p>
+              <strong>Congratulations!</strong> You've successfully
+              containerized and deployed a complete full-stack application. You
+              now understand:
+            </p>
+            <ul class="mb-2">
+              <li>How to write efficient, secure Dockerfiles</li>
+              <li>
+                Progressive optimization techniques for both backend and
+                frontend
+              </li>
+              <li>Multi-stage builds for production deployments</li>
+              <li>Container networking and service discovery</li>
+              <li>Application monitoring and troubleshooting</li>
+            </ul>
+            <p class="mb-0">
+              <strong>CCDC Application:</strong> These containerization skills
+              are directly applicable to migrating legacy applications in CCDC
+              competitions, where you'll need to quickly containerize services
+              while maintaining security and performance.
+            </p>
+          </div>
+
+          <h3>Next Steps and Advanced Topics</h3>
+          <p>
+            While this manual container approach works for learning, production
+            environments require more sophisticated orchestration. In upcoming
+            weeks, we'll explore:
+          </p>
+
+          <ul>
+            <li>
+              <strong>Docker Compose:</strong> Declarative multi-container
+              applications
+            </li>
+            <li>
+              <strong>Container Registries:</strong> Storing and distributing
+              images
+            </li>
+            <li>
+              <strong>Container Security:</strong> Vulnerability scanning and
+              runtime protection
+            </li>
+            <li>
+              <strong>Kubernetes:</strong> Container orchestration at scale
+            </li>
+            <li>
+              <strong>Monitoring and Logging:</strong> Observability in
+              containerized environments
+            </li>
+          </ul>
+
+          <p>
+            The containerization techniques you've learned today provide the
+            foundation for all these advanced topics, making you well-prepared
+            for CCDC competition scenarios where rapid application deployment
+            and management are critical.
+          </p>
         </div>
         <div
           class="tab-pane fade"
