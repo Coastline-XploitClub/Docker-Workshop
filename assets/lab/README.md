@@ -169,6 +169,15 @@ lab/
 
 ## Setup Instructions
 
+> **⚠️ Important**: You will need **4 terminal windows** for this lab:
+>
+> - **Terminal 1**: MongoDB database server
+> - **Terminal 2**: Redis cache server
+> - **Terminal 3**: PHP web application server
+> - **Terminal 4**: Testing and verification commands
+>
+> **📋 Setup Overview**: We'll install MongoDB, Redis, and PHP, then start the production system locally before planning the Docker migration.
+
 ### Step 1: Update System and Install Base Packages
 
 ```bash
@@ -186,7 +195,18 @@ sudo apt install -y curl wget gnupg2 software-properties-common apt-transport-ht
 curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
 
 # Add MongoDB repository
-echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+sudo nano /etc/apt/sources.list.d/mongodb-org-7.0.list
+```
+
+**Copy and paste this line into the file:**
+
+```
+deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main
+```
+
+**Save and exit** (Ctrl+X, then Y, then Enter)
+
+```bash
 
 # Update package list and install MongoDB
 sudo apt update
@@ -229,7 +249,7 @@ sudo apt install -y php8.2-mongodb
 sudo apt install -y php8.2-redis
 
 # Install additional useful extensions
-sudo apt install -y php8.2-json php8.2-common
+sudo apt install -y php8.2-common
 
 # Verify PHP installation and extensions
 php --version
@@ -240,7 +260,12 @@ php -m | grep -E "(mongodb|redis)"  # Should show both extensions loaded
 
 ```bash
 # Create PHP configuration for larger file uploads
-sudo tee /etc/php/8.2/cli/conf.d/99-taskmanager.ini > /dev/null << 'EOF'
+sudo nano /etc/php/8.2/cli/conf.d/99-taskmanager.ini
+```
+
+**Copy and paste this content into the file:**
+
+```ini
 ; TaskManager Pro Configuration
 upload_max_filesize = 5M
 post_max_size = 6M
@@ -248,17 +273,23 @@ max_execution_time = 300
 memory_limit = 256M
 session.save_handler = redis
 session.save_path = "tcp://127.0.0.1:6379"
-EOF
+```
 
-# Copy configuration to FPM if planning to use with web server
+**Save and exit** (Ctrl+X, then Y, then Enter)
+
+```bash
+# Copy configuration to FPM if planning to use with web server later
 sudo cp /etc/php/8.2/cli/conf.d/99-taskmanager.ini /etc/php/8.2/fpm/conf.d/
+
+# Verify PHP extensions are loaded
+php -m | grep -E "(mongodb|redis)"  # Should show both extensions
 ```
 
 ### Step 6: Navigate to Application Directory
 
 ```bash
 # Navigate to the lab directory (adjust path as needed)
-cd /path/to/CCDC-25-26-Training/week2and3/assets/lab
+cd ~/Docker-Workshop/assets/lab/
 
 # Verify all application files are present
 ls -la web/ database/ cache/ uploads/
@@ -267,18 +298,31 @@ ls -la web/ database/ cache/ uploads/
 ### Step 7: Configure Application Directory Structure
 
 ```bash
-# Create upload directory with proper permissions
-sudo mkdir -p /var/www/html/uploads
-sudo chown -R www-data:www-data /var/www/html/uploads
-sudo chmod 755 /var/www/html/uploads
+# For development/lab environment, use local directories
+# Create local upload directory with proper permissions
+mkdir -p uploads_local
+chmod 755 uploads_local
 
-# Alternative: Use local upload directory (modify config.php)
-mkdir -p ./uploads
-chmod 755 ./uploads
+# Copy sample upload files to local directory
+cp -r uploads/* uploads_local/
 
-# If using local uploads, update config.php
-sed -i "s|define('UPLOAD_DIR', '/var/www/html/uploads/');|define('UPLOAD_DIR', './uploads/');|" web/config.php
+# Update config.php to use local upload directory for lab environment
+nano web/config.php
 ```
+
+**In nano, find this line:**
+
+```php
+define('UPLOAD_DIR', '/var/www/html/uploads/');
+```
+
+**Replace it with:**
+
+```php
+define('UPLOAD_DIR', './uploads_local/');
+```
+
+**Save and exit** (Ctrl+X, then Y, then Enter)
 
 ### Step 8: Set Up MongoDB Database
 
@@ -286,70 +330,86 @@ sed -i "s|define('UPLOAD_DIR', '/var/www/html/uploads/');|define('UPLOAD_DIR', '
 # Create database directory for local MongoDB instance
 mkdir -p ./database_data
 
-# Start MongoDB with local data directory (Terminal 1)
+# Start MongoDB with local data directory (keep this terminal open - Terminal 1)
 mongod --dbpath ./database_data --logpath ./database_data/mongodb.log --fork
 
 # Wait 3 seconds for MongoDB to start
 sleep 3
 
 # Set up database schema and import production data
-mongosh < database/schema.js
-mongosh < database/seed.js
+mongosh < database/schema.js    # Creates database structure and indexes
+mongosh < database/seed.js     # Imports 10 tasks, 4 users, and activity logs
 
-# Verify database setup
+# Verify database setup (should show: Users: 4, Tasks: 10, Activity Logs: 12)
 mongosh taskapp --eval "print('Users: ' + db.users.countDocuments()); print('Tasks: ' + db.tasks.countDocuments()); print('Activity Logs: ' + db.activity_logs.countDocuments());"
 ```
+
+> **Note**: If you see warnings about deprecated `mongo` command, that's normal - we're using the modern `mongosh` client.
 
 ### Step 9: Set Up Redis Cache
 
 ```bash
-# Stop system Redis if running to avoid conflicts
+# Stop system Redis if running to avoid port conflicts
 sudo systemctl stop redis-server
 
-# Start Redis with application configuration (Terminal 2)
+# Start Redis with application configuration (keep this terminal open - Terminal 2)
 redis-server cache/redis.conf &
 
 # Wait 2 seconds for Redis to start
 sleep 2
 
-# Load production cache data
+# Load production cache data (user sessions, app config, activity logs)
 redis-cli < cache/production_data.redis
 
 # Verify Redis setup
-redis-cli ping  # Should return "PONG"
+redis-cli ping                      # Should return "PONG"
 redis-cli GET "config:app_version"  # Should return "2.1.0"
-redis-cli LLEN "recent_activity"   # Should return 3
+redis-cli LLEN "recent_activity"    # Should return 3
 ```
+
+> **Note**: You may see warnings about comments in the Redis data file - this is normal behavior. Redis ignores comment lines but processes the data commands successfully.
 
 ### Step 10: Start Web Application
 
 ```bash
-# Start PHP built-in web server (Terminal 3)
+# Start PHP built-in web server (Terminal 3 - keep this open)
 cd web/
 php -S localhost:8080
 
 # Application will be available at: http://localhost:8080
 ```
 
+> **Important**: Keep this terminal open! The web server will run in the foreground and show access logs.
+
 ### Step 11: Verify Complete Application Setup
 
+**Open a new terminal (Terminal 4) for testing:**
+
 ```bash
-# In a new terminal, test all components:
+# Navigate back to the lab directory
+cd ~/Docker-Workshop/assets/lab/
 
-# Test MongoDB connection
-mongosh taskapp --eval "db.tasks.countDocuments()"  # Should return 10
+# Test MongoDB connection (should return 10)
+mongosh taskapp --eval "db.tasks.countDocuments()"
 
-# Test Redis connection
-redis-cli ping  # Should return "PONG"
+# Test Redis connection (should return "PONG")
+redis-cli ping
 
-# Test web application
-curl -s http://localhost:8080 | grep "TaskManager Pro"  # Should find title
+# Test web application (should find "TaskManager Pro")
+curl -s http://localhost:8080 | grep "TaskManager Pro"
 
-# Test API endpoints
-curl -s http://localhost:8080/api/tasks | jq '.success'  # Should return true (requires jq)
-# OR without jq:
+# Test API endpoints (should return true)
 curl -s http://localhost:8080/api/tasks | grep '"success":true'
 ```
+
+**If all tests pass, open your browser and visit:** http://localhost:8080
+
+You should see the TaskManager Pro dashboard with:
+
+- ✅ 4 user statistics cards showing task counts
+- ✅ Task creation form on the left
+- ✅ Task list on the right showing 10 existing tasks
+- ✅ File upload functionality working
 
 ## Production Deployment Options
 
@@ -363,8 +423,13 @@ sudo apt install -y apache2 php8.2-fpm
 sudo a2enmod proxy_fcgi setenvif rewrite
 sudo a2enconf php8.2-fpm
 
-# Create virtual host
-sudo tee /etc/apache2/sites-available/taskmanager.conf > /dev/null << 'EOF'
+# Create virtual host configuration
+sudo nano /etc/apache2/sites-available/taskmanager.conf
+```
+
+**Copy and paste this content into the file:**
+
+```apache
 <VirtualHost *:80>
     ServerName taskmanager.local
     DocumentRoot /var/www/html/taskmanager/web
@@ -382,7 +447,11 @@ sudo tee /etc/apache2/sites-available/taskmanager.conf > /dev/null << 'EOF'
     ErrorLog ${APACHE_LOG_DIR}/taskmanager_error.log
     CustomLog ${APACHE_LOG_DIR}/taskmanager_access.log combined
 </VirtualHost>
-EOF
+```
+
+**Save and exit** (Ctrl+X, then Y, then Enter)
+
+```bash
 
 # Copy application files
 sudo cp -r . /var/www/html/taskmanager/
@@ -400,7 +469,12 @@ sudo systemctl reload apache2
 sudo apt install -y nginx php8.2-fpm
 
 # Create Nginx configuration
-sudo tee /etc/nginx/sites-available/taskmanager > /dev/null << 'EOF'
+sudo nano /etc/nginx/sites-available/taskmanager
+```
+
+**Copy and paste this content into the file:**
+
+```nginx
 server {
     listen 80;
     server_name taskmanager.local;
@@ -426,7 +500,11 @@ server {
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
 }
-EOF
+```
+
+**Save and exit** (Ctrl+X, then Y, then Enter)
+
+```bash
 
 # Enable site
 sudo ln -s /etc/nginx/sites-available/taskmanager /etc/nginx/sites-enabled/
