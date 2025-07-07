@@ -313,8 +313,6 @@ cp -r uploads/* uploads_local/
 # Create database directory for local MongoDB instance
 mkdir -p ./database_data
 
-# Start MongoDB with local data directory (keep this terminal open - Terminal 1)
-
 # Stop system MongoDB if running to avoid port conflicts
 sudo systemctl stop mongod
 
@@ -325,7 +323,7 @@ mongod --dbpath ./database_data --logpath ./database_data/mongodb.log --fork
 mongosh < database/schema.js    # Creates database structure and indexes
 mongosh < database/seed.js     # Imports 10 tasks, 4 users, and activity logs
 
-# Verify database setup (should show: Users: 4, Tasks: 10, Activity Logs: 12)
+# Verify database setup (should show: Users: 4, Tasks: 10, Activity Logs: 5)
 mongosh taskapp --eval "print('Users: ' + db.users.countDocuments()); print('Tasks: ' + db.tasks.countDocuments()); print('Activity Logs: ' + db.activity_logs.countDocuments());"
 ```
 
@@ -381,11 +379,13 @@ redis-cli ping
 # Test web application (should find "TaskManager Pro")
 curl -s http://localhost:8080 | grep "TaskManager Pro"
 
-# Test API endpoints (should return true)
+# Test task creation (should return 11)
 curl -s http://localhost:8080/api/tasks | grep '"success":true'
 
-# Test remote access (replace YOUR_IP with actual server IP)
-# curl -s http://YOUR_IP:8080 | grep "TaskManager Pro"
+# Test task creation (should return 11)
+curl -s http://localhost:8080/api/tasks | grep '"success":true'
+
+
 ```
 
 **If all tests pass, open your browser and visit:** http://localhost:8080
