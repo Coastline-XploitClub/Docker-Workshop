@@ -19,7 +19,6 @@ docker-examples/
 │   └── Dockerfile              # MongoDB container (if custom needed)
 ├── cache/
 │   └── Dockerfile              # Redis container (if custom needed)
-├── docker-compose.yml          # Complete orchestration
 ├── .env                        # Environment variables
 ├── migration-plan.md           # Your migration strategy
 └── scripts/
@@ -31,23 +30,27 @@ docker-examples/
 ## Key Considerations
 
 ### Networking
+
 - Services must communicate internally
 - Web application must be accessible from host
 - Database and cache should NOT be directly accessible from host
 
 ### Volumes
+
 - Database data must persist container restarts
-- Redis data should persist container restarts  
+- Redis data should persist container restarts
 - Uploaded files must persist container restarts
 - Consider backup and recovery scenarios
 
 ### Environment Variables
+
 - Database connection settings
 - Redis connection settings
 - Application configuration
 - Sensitive data handling
 
 ### Security
+
 - Non-root users in containers
 - Proper file permissions
 - Network isolation
