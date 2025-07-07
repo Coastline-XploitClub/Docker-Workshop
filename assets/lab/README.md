@@ -272,7 +272,7 @@ post_max_size = 6M
 max_execution_time = 300
 memory_limit = 256M
 session.save_handler = redis
-session.save_path = "tcp://127.0.0.1:6379"
+session.save_path = "tcp://localhost:6379"
 ```
 
 **Save and exit** (Ctrl+X, then Y, then Enter)
@@ -305,24 +305,7 @@ chmod 755 uploads_local
 
 # Copy sample upload files to local directory
 cp -r uploads/* uploads_local/
-
-# Update config.php to use local upload directory for lab environment
-nano web/config.php
 ```
-
-**In nano, find this line:**
-
-```php
-define('UPLOAD_DIR', '/var/www/html/uploads/');
-```
-
-**Replace it with:**
-
-```php
-define('UPLOAD_DIR', './uploads_local/');
-```
-
-**Save and exit** (Ctrl+X, then Y, then Enter)
 
 ### Step 8: Set Up MongoDB Database
 
@@ -335,7 +318,7 @@ mkdir -p ./database_data
 # Stop system MongoDB if running to avoid port conflicts
 sudo systemctl stop mongod
 
-# Start MongoDB with local data directory
+# Start MongoDB with local data directory (binds to 0.0.0.0 by default)
 mongod --dbpath ./database_data --logpath ./database_data/mongodb.log --fork
 
 # Set up database schema and import production data
@@ -373,9 +356,10 @@ redis-cli LLEN "recent_activity"    # Should return 3
 ```bash
 # Start PHP built-in web server (Terminal 3 - keep this open)
 cd web/
-php -S localhost:8080
+php -S 0.0.0.0:8080
 
-# Application will be available at: http://localhost:8080
+# Application will be available at: http://localhost:8080 (locally)
+# Or http://YOUR_SERVER_IP:8080 (remotely)
 ```
 
 > **Important**: Keep this terminal open! The web server will run in the foreground and show access logs.
@@ -399,6 +383,9 @@ curl -s http://localhost:8080 | grep "TaskManager Pro"
 
 # Test API endpoints (should return true)
 curl -s http://localhost:8080/api/tasks | grep '"success":true'
+
+# Test remote access (replace YOUR_IP with actual server IP)
+# curl -s http://YOUR_IP:8080 | grep "TaskManager Pro"
 ```
 
 **If all tests pass, open your browser and visit:** http://localhost:8080
