@@ -331,10 +331,12 @@ define('UPLOAD_DIR', './uploads_local/');
 mkdir -p ./database_data
 
 # Start MongoDB with local data directory (keep this terminal open - Terminal 1)
-mongod --dbpath ./database_data --logpath ./database_data/mongodb.log --fork
 
-# Wait 3 seconds for MongoDB to start
-sleep 3
+# Stop system MongoDB if running to avoid port conflicts
+sudo systemctl stop mongod
+
+# Start MongoDB with local data directory
+mongod --dbpath ./database_data --logpath ./database_data/mongodb.log --fork
 
 # Set up database schema and import production data
 mongosh < database/schema.js    # Creates database structure and indexes
@@ -354,9 +356,6 @@ sudo systemctl stop redis-server
 
 # Start Redis with application configuration (keep this terminal open - Terminal 2)
 redis-server cache/redis.conf &
-
-# Wait 2 seconds for Redis to start
-sleep 2
 
 # Load production cache data (user sessions, app config, activity logs)
 redis-cli < cache/production_data.redis
