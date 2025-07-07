@@ -75,7 +75,11 @@ lab/
 │   ├── script.js          # Frontend JavaScript
 │   ├── config.php         # Database/Redis connections
 │   ├── app.php            # Core application logic
-│   └── api.php            # REST API endpoints
+│   ├── api.php            # REST API endpoints
+│   ├── router.php         # Web server routing (REQUIRED for API)
+│   ├── setup.sh          # Automated dependency setup script
+│   ├── test_api.php       # API testing and diagnostics
+│   └── debug.log          # Application debug logging (created at runtime)
 ├── database/              # MongoDB Setup
 │   ├── schema.js          # Database structure
 │   └── seed.js            # Production data simulation
@@ -106,7 +110,8 @@ lab/
 - **Backend**: PHP 8.x with MongoDB and Redis clients
 - **Database**: MongoDB 6.0+ with production indexes (requires `mongosh` client)
 - **Cache**: Redis 7.0+ with persistence enabled (configuration updated for local directories)
-- **Web Server**: Apache/Nginx with PHP-FPM
+- **Dependencies**: Composer with MongoDB PHP library (`mongodb/mongodb`)
+- **Web Server**: Apache/Nginx with PHP-FPM or PHP built-in server with router
 
 > **Note**: This lab requires the modern `mongosh` MongoDB shell client. The legacy `mongo` command has been deprecated and replaced with `mongosh` in recent MongoDB versions.
 
@@ -166,6 +171,32 @@ lab/
    - Service communication flows
    - Maintenance and troubleshooting guide
    - Performance benchmarking results
+
+## Quick Start Summary
+
+If you're familiar with the setup process, here are the key commands:
+
+```bash
+# Install dependencies (if not already done)
+sudo apt update && sudo apt install -y mongodb-org mongodb-mongosh redis-server php8.2 php8.2-mongodb php8.2-redis curl
+
+# Install Composer globally
+curl -sS https://getcomposer.org/installer | php && sudo mv composer.phar /usr/local/bin/composer
+
+# Start services
+mongod --dbpath ./database_data --logpath ./database_data/mongodb.log --fork
+redis-server cache/redis.conf &
+
+# Set up data
+mongosh < database/schema.js && mongosh < database/seed.js
+redis-cli < cache/production_data.redis
+
+# Set up PHP application
+cd web/ && ./setup.sh
+
+# Start web server (IMPORTANT: include router.php)
+php -S 0.0.0.0:8080 router.php
+```
 
 ## Setup Instructions
 
@@ -251,9 +282,15 @@ sudo apt install -y php8.2-redis
 # Install additional useful extensions
 sudo apt install -y php8.2-common
 
+# Install Composer (required for MongoDB PHP library)
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+sudo chmod +x /usr/local/bin/composer
+
 # Verify PHP installation and extensions
 php --version
 php -m | grep -E "(mongodb|redis)"  # Should show both extensions loaded
+composer --version  # Should show Composer version
 ```
 
 ### Step 5: Configure PHP for Application
@@ -349,20 +386,40 @@ redis-cli LLEN "recent_activity"    # Should return 3
 
 > **Note**: You may see warnings about comments in the Redis data file - this is normal behavior. Redis ignores comment lines but processes the data commands successfully.
 
-### Step 10: Start Web Application
+### Step 10: Set Up PHP Application Dependencies
 
 ```bash
-# Start PHP built-in web server (Terminal 3 - keep this open)
+# Navigate to the web application directory
 cd web/
-php -S 0.0.0.0:8080
+
+# Run the setup script to install required dependencies
+./setup.sh
+
+# This script will:
+# - Install/verify Composer
+# - Create composer.json with MongoDB library dependency
+# - Install MongoDB PHP library via Composer
+# - Create required directories
+# - Run diagnostic tests
+```
+
+### Step 11: Start Web Application
+
+```bash
+# Start PHP built-in web server with router (Terminal 3 - keep this open)
+cd web/
+php -S 0.0.0.0:8080 router.php
 
 # Application will be available at: http://localhost:8080 (locally)
 # Or http://YOUR_SERVER_IP:8080 (remotely)
 ```
 
-> **Important**: Keep this terminal open! The web server will run in the foreground and show access logs.
+> **Important**:
+>
+> - Keep this terminal open! The web server will run in the foreground and show access logs.
+> - The `router.php` file is essential for proper API routing - don't omit it!
 
-### Step 11: Verify Complete Application Setup
+### Step 12: Verify Complete Application Setup
 
 **Open a new terminal (Terminal 4) for testing:**
 
@@ -430,6 +487,9 @@ sudo nano /etc/apache2/sites-available/taskmanager.conf
     RewriteEngine On
     RewriteRule ^/api/(.*)$ /api.php [QSA,L]
 
+    # Handle PHP dependencies
+    php_admin_value auto_prepend_file /var/www/html/taskmanager/web/vendor/autoload.php
+
     ErrorLog ${APACHE_LOG_DIR}/taskmanager_error.log
     CustomLog ${APACHE_LOG_DIR}/taskmanager_access.log combined
 </VirtualHost>
@@ -441,6 +501,12 @@ sudo nano /etc/apache2/sites-available/taskmanager.conf
 
 # Copy application files
 sudo cp -r . /var/www/html/taskmanager/
+
+# Set up PHP dependencies
+cd /var/www/html/taskmanager/web/
+sudo -u www-data ./setup.sh
+
+# Set ownership
 sudo chown -R www-data:www-data /var/www/html/taskmanager/
 
 # Enable site
@@ -477,6 +543,7 @@ server {
         fastcgi_index api.php;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root/api.php;
+        fastcgi_param PHP_VALUE "auto_prepend_file=/var/www/html/taskmanager/web/vendor/autoload.php";
     }
 
     location ~ \.php$ {
@@ -521,12 +588,36 @@ ls -la uploads/
 - **"command not found: mongo"**: Use `mongosh` instead of `mongo` (legacy command deprecated)
 - **Syntax errors with load()**: Use `mongosh < script.js` instead of `load("script.js")` inside the shell
 - **Connection refused**: Ensure `mongod --dbpath ./database/` is running in a separate terminal
+- **"Class 'MongoDB\Client' not found"**: Run `./setup.sh` in the web directory to install the MongoDB PHP library via Composer
 
 ### Redis Issues
 
 - **Permission denied on /var/lib/redis**: Configuration fixed to use local `./cache/` directory
 - **Comment warnings during data load**: Normal behavior - Redis doesn't understand `#` comments but data loads successfully
 - **Connection refused**: Ensure `redis-server cache/redis.conf` is running
+
+### Web Application Issues
+
+- **"JSON.parse: unexpected character at line 1"**: This indicates the API is returning HTML instead of JSON
+  - **Solution**: Make sure you're using `php -S 0.0.0.0:8080 router.php` (with router.php)
+  - **Check**: `curl -v http://localhost:8080/api/tasks` should return `Content-Type: application/json`
+- **API requests returning HTML pages**: Missing router.php in server startup command
+- **Task creation/file upload not working**: Usually indicates API routing issues or missing MongoDB library
+
+### Debug Information
+
+The application includes comprehensive debug logging:
+
+```bash
+# View debug log in real-time
+tail -f web/debug.log
+
+# Check for specific issues
+grep "ERROR\|FAILED\|CRITICAL" web/debug.log
+
+# Test API endpoints directly
+curl -v http://localhost:8080/api/tasks
+```
 
 ### Verification Commands
 
@@ -538,6 +629,10 @@ ps aux | grep redis     # Should show Redis process
 # Test connectivity
 mongosh taskapp --eval "db.tasks.countDocuments()"  # Should return 10
 redis-cli ping                                        # Should return "PONG"
+
+# Test web application API
+curl -s http://localhost:8080/api/tasks | grep '"success":true'  # Should find success
+curl -I http://localhost:8080/api/tasks | grep "Content-Type"   # Should show application/json
 ```
 
 ## CCDC Competition Relevance
