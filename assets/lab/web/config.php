@@ -10,8 +10,9 @@ function debug_log($message) {
     $logMessage = "[$timestamp] DEBUG: $message\n";
     error_log($logMessage, 3, './debug.log');
     
-    // Also output to browser for immediate debugging
-    if (php_sapi_name() !== 'cli') {
+    // Only output to browser for HTML pages, not API responses
+    if (php_sapi_name() !== 'cli' && 
+        (!isset($_SERVER['REQUEST_URI']) || strpos($_SERVER['REQUEST_URI'], '/api/') !== 0)) {
         echo "<!-- DEBUG: $message -->\n";
     }
 }
