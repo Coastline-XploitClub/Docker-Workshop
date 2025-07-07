@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskManager Pro - Production System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TaskManager Pro</h1>
+            <div class="header-info">
+                <span class="system-status">🟢 Production System</span>
+                <span class="user-info">User: <span id="current-user">admin</span></span>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Tasks</h3>
+                    <span class="stat-number" id="total-tasks">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending</h3>
+                    <span class="stat-number pending" id="pending-tasks">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>In Progress</h3>
+                    <span class="stat-number in-progress" id="progress-tasks">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Completed</h3>
+                    <span class="stat-number completed" id="completed-tasks">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="task-form">
+                <h2>Create New Task</h2>
+                <form id="new-task-form">
+                    <div class="form-group">
+                        <label for="task-title">Title:</label>
+                        <input type="text" id="task-title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-description">Description:</label>
+                        <textarea id="task-description" name="description" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="task-priority">Priority:</label>
+                            <select id="task-priority" name="priority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="assigned-to">Assign To:</label>
+                            <select id="assigned-to" name="assigned_to">
+                                <option value="admin">Admin</option>
+                                <option value="developer">Developer</option>
+                                <option value="analyst">Security Analyst</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit">Create Task</button>
+                </form>
+            </div>
+
+            <div class="file-upload">
+                <h3>Upload Task Attachment</h3>
+                <form id="upload-form" enctype="multipart/form-data">
+                    <input type="file" id="file-input" name="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg">
+                    <button type="submit">Upload File</button>
+                </form>
+                <div id="upload-status"></div>
+            </div>
+
+            <div class="task-list">
+                <h2>Task List</h2>
+                <div class="task-filters">
+                    <button class="filter-btn active" data-status="all">All</button>
+                    <button class="filter-btn" data-status="pending">Pending</button>
+                    <button class="filter-btn" data-status="in_progress">In Progress</button>
+                    <button class="filter-btn" data-status="completed">Completed</button>
+                </div>
+                <div id="tasks-container">
+                    <div class="loading">Loading tasks...</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>TaskManager Pro v2.1 | Production Environment | Last Updated: <span id="last-updated"></span></p>
+            <p class="warning">⚠️ This is a live production system. All changes are logged and monitored.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
