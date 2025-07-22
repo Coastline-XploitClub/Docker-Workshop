@@ -3911,9 +3911,7 @@ docker exec taskmanager-web ls -la /var/www/html/uploads/</code></pre>
                     <li>
                       Verify network connectivity:
                       <code
-                        >docker exec taskmanager-web nc -zv taskmanager-mongodb
-                        27017</code
-                      >
+                        >docker exec taskmanager-web apt install -y iputils-ping; ping -c3 taskmanager-mongodb</code>
                     </li>
                     <li>
                       Update connection string in config.php to use container
