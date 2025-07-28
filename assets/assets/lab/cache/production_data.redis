@@ -1,0 +1,75 @@
+# Redis Production Data Simulation
+# This file contains Redis commands to populate cache with production-like data
+# Run with: redis-cli < production_data.redis
+
+# Session data for active users
+SET "PHPREDIS_SESSION:sess_admin_2024_01_15_083000" "user_id|s:5:\"admin\";username|s:5:\"admin\";role|s:5:\"admin\";last_activity|i:1705305000;login_time|i:1705304200;"
+EXPIRE "PHPREDIS_SESSION:sess_admin_2024_01_15_083000" 3600
+
+SET "PHPREDIS_SESSION:sess_developer_2024_01_15_094500" "user_id|s:9:\"developer\";username|s:9:\"developer\";role|s:9:\"developer\";last_activity|i:1705309500;login_time|i:1705308900;"
+EXPIRE "PHPREDIS_SESSION:sess_developer_2024_01_15_094500" 3600
+
+SET "PHPREDIS_SESSION:sess_analyst_2024_01_15_072000" "user_id|s:7:\"analyst\";username|s:7:\"analyst\";role|s:14:\"security_analyst\";last_activity|i:1705300800;login_time|i:1705300200;"
+EXPIRE "PHPREDIS_SESSION:sess_analyst_2024_01_15_072000" 3600
+
+# Cached task data
+SET "tasks:all" "[{\"id\":\"67890abcdef123456789\",\"title\":\"Update SSL certificates for web servers\",\"description\":\"Renew SSL certificates for all production web servers. Current certificates expire in 30 days.\",\"status\":\"pending\",\"priority\":\"high\",\"assigned_to\":\"admin\",\"created_at\":\"2024-01-10 10:00:00\"},{\"id\":\"67890abcdef123456790\",\"title\":\"Security audit of user authentication system\",\"description\":\"Conduct comprehensive security review of the authentication system.\",\"status\":\"in_progress\",\"priority\":\"critical\",\"assigned_to\":\"analyst\",\"created_at\":\"2024-01-08 09:15:00\"}]"
+EXPIRE "tasks:all" 300
+
+# User statistics cache
+SET "user:stats:admin" "{\"total\":4,\"pending\":2,\"in_progress\":1,\"completed\":1}"
+EXPIRE "user:stats:admin" 120
+
+SET "user:stats:developer" "{\"total\":3,\"pending\":1,\"in_progress\":2,\"completed\":0}"
+EXPIRE "user:stats:developer" 120
+
+SET "user:stats:analyst" "{\"total\":2,\"pending\":0,\"in_progress\":1,\"completed\":1}"
+EXPIRE "user:stats:analyst" 120
+
+SET "user:stats:manager" "{\"total\":1,\"pending\":1,\"in_progress\":0,\"completed\":0}"
+EXPIRE "user:stats:manager" 120
+
+# Rate limiting data (simulating API usage)
+SET "rate_limit:api:192.168.1.100" "25"
+EXPIRE "rate_limit:api:192.168.1.100" 3600
+
+SET "rate_limit:api:192.168.1.102" "18"
+EXPIRE "rate_limit:api:192.168.1.102" 3600
+
+SET "rate_limit:api:192.168.1.105" "12"
+EXPIRE "rate_limit:api:192.168.1.105" 3600
+
+# Application configuration cache
+SET "config:app_version" "2.1.0"
+SET "config:maintenance_mode" "false"
+SET "config:max_file_size" "5242880"
+SET "config:session_timeout" "3600"
+
+# Login attempt tracking (security feature)
+SET "login_attempts:192.168.1.100" "0"
+SET "login_attempts:192.168.1.102" "0"
+SET "login_attempts:192.168.1.105" "1"
+
+# Recent activity cache
+LPUSH "recent_activity" "admin logged in at 2024-01-15 08:30:00"
+LPUSH "recent_activity" "developer updated task status at 2024-01-15 09:45:00"
+LPUSH "recent_activity" "analyst created security audit task at 2024-01-15 07:20:00"
+LTRIM "recent_activity" 0 9
+
+# Performance metrics
+SET "metrics:response_time_avg" "127"
+SET "metrics:active_connections" "15"
+SET "metrics:memory_usage" "68.5"
+SET "metrics:last_backup" "2024-01-15T06:00:00Z"
+
+# Notification queue
+LPUSH "notifications:admin" "SSL certificates expiring in 30 days"
+LPUSH "notifications:admin" "Backup verification required"
+LPUSH "notifications:analyst" "Security audit deadline approaching"
+LPUSH "notifications:developer" "Database performance review needed"
+
+# System health indicators
+SET "health:database" "healthy"
+SET "health:redis" "healthy"
+SET "health:web_server" "healthy"
+SET "health:last_check" "2024-01-15T10:00:00Z"

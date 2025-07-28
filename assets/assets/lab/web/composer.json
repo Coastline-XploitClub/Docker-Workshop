@@ -1,0 +1,17 @@
+{
+    "name": "taskmanager/pro",
+    "description": "TaskManager Pro - Production Task Management System",
+    "type": "project",
+    "require": {
+        "mongodb/mongodb": "^1.15",
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "TaskManager\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

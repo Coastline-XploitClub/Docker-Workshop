@@ -1,0 +1,1071 @@
+[2025-07-22 02:54:26] DEBUG: === Config.php loaded ===
+[2025-07-22 02:54:26] DEBUG: SAPI: cli
+[2025-07-22 02:54:26] DEBUG: Request URI: N/A
+[2025-07-22 02:54:26] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:54:26] DEBUG: Redis: localhost:6379
+[2025-07-22 02:54:26] DEBUG: Checking PHP extensions...
+[2025-07-22 02:54:26] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:54:26] DEBUG: Extension redis: LOADED
+[2025-07-22 02:54:26] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:54:26] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:54:26] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:54:26] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:54:26] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:54:26] DEBUG: Using non-authenticated connection
+[2025-07-22 02:54:26] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:54:26] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:54:26] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:54:26] DEBUG: Redis object created
+[2025-07-22 02:54:26] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:54:26] DEBUG: Redis ping result: 1
+[2025-07-22 02:54:26] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:54:26] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:54:26] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:54:26] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:54:26] DEBUG: Session started successfully. Session ID: 
+[2025-07-22 02:54:26] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:54:26] DEBUG: TaskManager constructor called
+[2025-07-22 02:54:26] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:54:26] DEBUG: Using non-authenticated connection
+[2025-07-22 02:54:26] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:54:26] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:54:26] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:54:26] DEBUG: Redis object created
+[2025-07-22 02:54:26] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:54:26] DEBUG: Redis ping result: 1
+[2025-07-22 02:54:26] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:54:26] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:54:26] DEBUG: getAllTasks called with useCache=1
+[2025-07-22 02:54:26] DEBUG: Checking Redis cache for tasks
+[2025-07-22 02:54:26] DEBUG: Tasks found in cache, returning cached data
+[2025-07-22 02:54:26] DEBUG: getAllTasks called with useCache=1
+[2025-07-22 02:54:26] DEBUG: Checking Redis cache for tasks
+[2025-07-22 02:54:26] DEBUG: Tasks found in cache, returning cached data
+[2025-07-22 02:55:23] ROUTER: === Router called ===
+[2025-07-22 02:55:23] ROUTER: Request URI: /
+[2025-07-22 02:55:23] ROUTER: Parsed path: /
+[2025-07-22 02:55:23] ROUTER: Method: GET
+[2025-07-22 02:55:23] ROUTER: Root path, serving index.html
+[2025-07-22 02:55:23] ROUTER: Serving static file: /home/administrator/Docker-Workshop/assets/lab/web/index.html
+[2025-07-22 02:55:23] ROUTER: Content-Type set to: text/html
+[2025-07-22 02:55:23] ROUTER: === Router called ===
+[2025-07-22 02:55:23] ROUTER: Request URI: /style.css
+[2025-07-22 02:55:23] ROUTER: Parsed path: /style.css
+[2025-07-22 02:55:23] ROUTER: Method: GET
+[2025-07-22 02:55:23] ROUTER: Serving static file: /home/administrator/Docker-Workshop/assets/lab/web/style.css
+[2025-07-22 02:55:23] ROUTER: Content-Type set to: text/css
+[2025-07-22 02:55:23] ROUTER: === Router called ===
+[2025-07-22 02:55:23] ROUTER: Request URI: /script.js
+[2025-07-22 02:55:23] ROUTER: Parsed path: /script.js
+[2025-07-22 02:55:23] ROUTER: Method: GET
+[2025-07-22 02:55:23] ROUTER: Serving static file: /home/administrator/Docker-Workshop/assets/lab/web/script.js
+[2025-07-22 02:55:23] ROUTER: Content-Type set to: application/javascript
+[2025-07-22 02:55:23] ROUTER: === Router called ===
+[2025-07-22 02:55:23] ROUTER: Request URI: /script.js
+[2025-07-22 02:55:23] ROUTER: Parsed path: /script.js
+[2025-07-22 02:55:23] ROUTER: Method: GET
+[2025-07-22 02:55:23] ROUTER: Serving static file: /home/administrator/Docker-Workshop/assets/lab/web/script.js
+[2025-07-22 02:55:23] ROUTER: Content-Type set to: application/javascript
+[2025-07-22 02:55:23] ROUTER: === Router called ===
+[2025-07-22 02:55:23] ROUTER: Request URI: /api/tasks
+[2025-07-22 02:55:23] ROUTER: Parsed path: /api/tasks
+[2025-07-22 02:55:23] ROUTER: Method: GET
+[2025-07-22 02:55:23] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:55:23] DEBUG: === Config.php loaded ===
+[2025-07-22 02:55:23] DEBUG: SAPI: cli-server
+[2025-07-22 02:55:23] DEBUG: Request URI: /api/tasks
+[2025-07-22 02:55:23] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:55:23] DEBUG: Redis: localhost:6379
+[2025-07-22 02:55:23] DEBUG: Checking PHP extensions...
+[2025-07-22 02:55:23] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:55:23] DEBUG: Extension redis: LOADED
+[2025-07-22 02:55:23] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:55:23] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:55:23] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:55:23] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:55:23] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:23] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:23] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:23] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:23] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:23] DEBUG: Redis object created
+[2025-07-22 02:55:23] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:23] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:23] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:55:23] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:55:23] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:55:23] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:55:23] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:55:23] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:55:23] DEBUG: === API Request Started ===
+[2025-07-22 02:55:23] DEBUG: Method: GET
+[2025-07-22 02:55:23] DEBUG: URI: /api/tasks
+[2025-07-22 02:55:23] DEBUG: Content-Type: not set
+[2025-07-22 02:55:23] DEBUG: JSON headers set
+[2025-07-22 02:55:23] DEBUG: JSON test successful: {"test":"success","timestamp":1753152923}...
+[2025-07-22 02:55:23] DEBUG: Initializing TaskManager...
+[2025-07-22 02:55:23] DEBUG: TaskManager constructor called
+[2025-07-22 02:55:23] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:23] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:23] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:23] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:23] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:23] DEBUG: Redis object created
+[2025-07-22 02:55:23] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:23] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:23] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:55:23] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:55:23] DEBUG: TaskManager created successfully
+[2025-07-22 02:55:23] DEBUG: Raw input length: 0
+[2025-07-22 02:55:23] DEBUG: Raw input preview: 
+[2025-07-22 02:55:23] DEBUG: === Starting route matching ===
+[2025-07-22 02:55:23] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:55:23] DEBUG: Testing route: GET /api/tasks against /api/tasks with pattern: #^/api/tasks$#
+[2025-07-22 02:55:23] DEBUG: Route matched! Calling handler: getTasks
+[2025-07-22 02:55:23] DEBUG: === getTasks called ===
+[2025-07-22 02:55:23] DEBUG: getAllTasks called with useCache=1
+[2025-07-22 02:55:23] DEBUG: Checking Redis cache for tasks
+[2025-07-22 02:55:23] DEBUG: Tasks found in cache, returning cached data
+[2025-07-22 02:55:23] DEBUG: Tasks retrieved: 2 items
+[2025-07-22 02:55:23] DEBUG: Response prepared, outputting JSON...
+[2025-07-22 02:55:23] DEBUG: JSON output complete
+[2025-07-22 02:55:23] DEBUG: Handler completed successfully
+[2025-07-22 02:55:23] DEBUG: === API Request Complete ===
+[2025-07-22 02:55:23] ROUTER: === Router called ===
+[2025-07-22 02:55:23] ROUTER: Request URI: /api/users/admin/stats
+[2025-07-22 02:55:23] ROUTER: Parsed path: /api/users/admin/stats
+[2025-07-22 02:55:23] ROUTER: Method: GET
+[2025-07-22 02:55:23] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:55:23] DEBUG: === Config.php loaded ===
+[2025-07-22 02:55:23] DEBUG: SAPI: cli-server
+[2025-07-22 02:55:23] DEBUG: Request URI: /api/users/admin/stats
+[2025-07-22 02:55:23] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:55:23] DEBUG: Redis: localhost:6379
+[2025-07-22 02:55:23] DEBUG: Checking PHP extensions...
+[2025-07-22 02:55:23] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:55:23] DEBUG: Extension redis: LOADED
+[2025-07-22 02:55:23] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:55:23] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:55:23] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:55:23] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:55:23] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:23] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:23] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:23] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:23] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:23] DEBUG: Redis object created
+[2025-07-22 02:55:23] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:23] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:23] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:55:23] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:55:23] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:55:23] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:55:23] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:55:23] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:55:23] DEBUG: === API Request Started ===
+[2025-07-22 02:55:23] DEBUG: Method: GET
+[2025-07-22 02:55:23] DEBUG: URI: /api/users/admin/stats
+[2025-07-22 02:55:23] DEBUG: Content-Type: not set
+[2025-07-22 02:55:23] DEBUG: JSON headers set
+[2025-07-22 02:55:23] DEBUG: JSON test successful: {"test":"success","timestamp":1753152923}...
+[2025-07-22 02:55:23] DEBUG: Initializing TaskManager...
+[2025-07-22 02:55:23] DEBUG: TaskManager constructor called
+[2025-07-22 02:55:23] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:23] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:23] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:23] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:23] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:23] DEBUG: Redis object created
+[2025-07-22 02:55:23] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:23] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:23] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:55:23] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:55:23] DEBUG: TaskManager created successfully
+[2025-07-22 02:55:23] DEBUG: Raw input length: 0
+[2025-07-22 02:55:23] DEBUG: Raw input preview: 
+[2025-07-22 02:55:23] DEBUG: === Starting route matching ===
+[2025-07-22 02:55:23] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:55:23] DEBUG: Testing route: GET /api/tasks against /api/users/admin/stats with pattern: #^/api/tasks$#
+[2025-07-22 02:55:23] DEBUG: Testing route: GET /api/users/([^/]+)/stats against /api/users/admin/stats with pattern: #^/api/users/([^/]+)/stats$#
+[2025-07-22 02:55:23] DEBUG: Route matched! Calling handler: getUserStats
+[2025-07-22 02:55:23] DEBUG: === getUserStats called ===
+[2025-07-22 02:55:23] DEBUG: User ID: admin
+[2025-07-22 02:55:23] DEBUG: getUserStats called for user: admin
+[2025-07-22 02:55:23] DEBUG: No cached user stats found
+[2025-07-22 02:55:23] DEBUG: Calculating user stats from MongoDB
+[2025-07-22 02:55:23] DEBUG: User stats calculated: {"total":4,"pending":3,"in_progress":0,"completed":1}
+[2025-07-22 02:55:23] DEBUG: User stats cached
+[2025-07-22 02:55:23] DEBUG: Stats retrieved: {"total":4,"pending":3,"in_progress":0,"completed":1}
+[2025-07-22 02:55:23] DEBUG: Handler completed successfully
+[2025-07-22 02:55:23] DEBUG: === API Request Complete ===
+[2025-07-22 02:55:49] ROUTER: === Router called ===
+[2025-07-22 02:55:49] ROUTER: Request URI: /api/tasks
+[2025-07-22 02:55:49] ROUTER: Parsed path: /api/tasks
+[2025-07-22 02:55:49] ROUTER: Method: POST
+[2025-07-22 02:55:49] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:55:49] DEBUG: === Config.php loaded ===
+[2025-07-22 02:55:49] DEBUG: SAPI: cli-server
+[2025-07-22 02:55:49] DEBUG: Request URI: /api/tasks
+[2025-07-22 02:55:49] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: Redis: localhost:6379
+[2025-07-22 02:55:49] DEBUG: Checking PHP extensions...
+[2025-07-22 02:55:49] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:55:49] DEBUG: Extension redis: LOADED
+[2025-07-22 02:55:49] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:55:49] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:55:49] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:55:49] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:55:49] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:49] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:49] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:49] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:49] DEBUG: Redis object created
+[2025-07-22 02:55:49] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:49] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:49] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:55:49] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:55:49] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:55:49] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:55:49] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:55:49] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:55:49] DEBUG: === API Request Started ===
+[2025-07-22 02:55:49] DEBUG: Method: POST
+[2025-07-22 02:55:49] DEBUG: URI: /api/tasks
+[2025-07-22 02:55:49] DEBUG: Content-Type: application/json
+[2025-07-22 02:55:49] DEBUG: JSON headers set
+[2025-07-22 02:55:49] DEBUG: JSON test successful: {"test":"success","timestamp":1753152949}...
+[2025-07-22 02:55:49] DEBUG: Initializing TaskManager...
+[2025-07-22 02:55:49] DEBUG: TaskManager constructor called
+[2025-07-22 02:55:49] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:49] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:49] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:49] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:49] DEBUG: Redis object created
+[2025-07-22 02:55:49] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:49] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:49] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:55:49] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:55:49] DEBUG: TaskManager created successfully
+[2025-07-22 02:55:49] DEBUG: Raw input length: 94
+[2025-07-22 02:55:49] DEBUG: Raw input preview: {"title":"test task","description":"this is a test","priority":"medium","assigned_to":"admin"}
+[2025-07-22 02:55:49] DEBUG: Input decoded successfully: {"title":"test task","description":"this is a test","priority":"medium","assigned_to":"admin"}
+[2025-07-22 02:55:49] DEBUG: === Starting route matching ===
+[2025-07-22 02:55:49] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:55:49] DEBUG: Testing route: POST /api/tasks against /api/tasks with pattern: #^/api/tasks$#
+[2025-07-22 02:55:49] DEBUG: Route matched! Calling handler: createTask
+[2025-07-22 02:55:49] DEBUG: === createTask called ===
+[2025-07-22 02:55:49] DEBUG: Input data: {"title":"test task","description":"this is a test","priority":"medium","assigned_to":"admin"}
+[2025-07-22 02:55:49] DEBUG: Creating task for user: anonymous
+[2025-07-22 02:55:49] DEBUG: createTask called: title='test task', priority='medium', assigned_to='admin'
+[2025-07-22 02:55:49] DEBUG: Inserting new task into MongoDB
+[2025-07-22 02:55:49] DEBUG: Task data prepared: {"title":"test task","description":"this is a test","status":"pending","priority":"medium","assigned_to":"admin","created_at":{"$date":{"$numberLong":"1753152949686"}},"updated_at":{"$date":{"$numberLong":"1753152949686"}}}
+[2025-07-22 02:55:49] DEBUG: Task inserted with ID: 687efdb5e47f033902040622
+[2025-07-22 02:55:49] DEBUG: Task cache cleared
+[2025-07-22 02:55:49] DEBUG: Task created successfully with ID: 687efdb5e47f033902040622
+[2025-07-22 02:55:49] DEBUG: logUserActivity called: user='anonymous', action='create_task'
+[2025-07-22 02:55:49] DEBUG: Logging activity to MongoDB
+[2025-07-22 02:55:49] DEBUG: Activity logged successfully
+[2025-07-22 02:55:49] DEBUG: Handler completed successfully
+[2025-07-22 02:55:49] DEBUG: === API Request Complete ===
+[2025-07-22 02:55:49] ROUTER: === Router called ===
+[2025-07-22 02:55:49] ROUTER: Request URI: /api/tasks
+[2025-07-22 02:55:49] ROUTER: Parsed path: /api/tasks
+[2025-07-22 02:55:49] ROUTER: Method: GET
+[2025-07-22 02:55:49] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:55:49] DEBUG: === Config.php loaded ===
+[2025-07-22 02:55:49] DEBUG: SAPI: cli-server
+[2025-07-22 02:55:49] DEBUG: Request URI: /api/tasks
+[2025-07-22 02:55:49] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: Redis: localhost:6379
+[2025-07-22 02:55:49] DEBUG: Checking PHP extensions...
+[2025-07-22 02:55:49] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:55:49] DEBUG: Extension redis: LOADED
+[2025-07-22 02:55:49] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:55:49] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:55:49] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:55:49] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:55:49] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:49] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:49] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:49] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:49] DEBUG: Redis object created
+[2025-07-22 02:55:49] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:49] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:49] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:55:49] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:55:49] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:55:49] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:55:49] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:55:49] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:55:49] DEBUG: === API Request Started ===
+[2025-07-22 02:55:49] DEBUG: Method: GET
+[2025-07-22 02:55:49] DEBUG: URI: /api/tasks
+[2025-07-22 02:55:49] DEBUG: Content-Type: not set
+[2025-07-22 02:55:49] DEBUG: JSON headers set
+[2025-07-22 02:55:49] DEBUG: JSON test successful: {"test":"success","timestamp":1753152949}...
+[2025-07-22 02:55:49] DEBUG: Initializing TaskManager...
+[2025-07-22 02:55:49] DEBUG: TaskManager constructor called
+[2025-07-22 02:55:49] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:49] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:49] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:49] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:49] DEBUG: Redis object created
+[2025-07-22 02:55:49] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:49] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:49] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:55:49] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:55:49] DEBUG: TaskManager created successfully
+[2025-07-22 02:55:49] DEBUG: Raw input length: 0
+[2025-07-22 02:55:49] DEBUG: Raw input preview: 
+[2025-07-22 02:55:49] DEBUG: === Starting route matching ===
+[2025-07-22 02:55:49] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:55:49] DEBUG: Testing route: GET /api/tasks against /api/tasks with pattern: #^/api/tasks$#
+[2025-07-22 02:55:49] DEBUG: Route matched! Calling handler: getTasks
+[2025-07-22 02:55:49] DEBUG: === getTasks called ===
+[2025-07-22 02:55:49] DEBUG: getAllTasks called with useCache=1
+[2025-07-22 02:55:49] DEBUG: Checking Redis cache for tasks
+[2025-07-22 02:55:49] DEBUG: No cached tasks found
+[2025-07-22 02:55:49] DEBUG: Querying MongoDB for tasks
+[2025-07-22 02:55:49] DEBUG: Collection selected: tasks
+[2025-07-22 02:55:49] DEBUG: MongoDB query executed
+[2025-07-22 02:55:49] DEBUG: Processed 11 tasks from MongoDB
+[2025-07-22 02:55:49] DEBUG: Tasks cached in Redis
+[2025-07-22 02:55:49] DEBUG: Tasks retrieved: 11 items
+[2025-07-22 02:55:49] DEBUG: Response prepared, outputting JSON...
+[2025-07-22 02:55:49] DEBUG: JSON output complete
+[2025-07-22 02:55:49] DEBUG: Handler completed successfully
+[2025-07-22 02:55:49] DEBUG: === API Request Complete ===
+[2025-07-22 02:55:49] ROUTER: === Router called ===
+[2025-07-22 02:55:49] ROUTER: Request URI: /api/users/admin/stats
+[2025-07-22 02:55:49] ROUTER: Parsed path: /api/users/admin/stats
+[2025-07-22 02:55:49] ROUTER: Method: GET
+[2025-07-22 02:55:49] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:55:49] DEBUG: === Config.php loaded ===
+[2025-07-22 02:55:49] DEBUG: SAPI: cli-server
+[2025-07-22 02:55:49] DEBUG: Request URI: /api/users/admin/stats
+[2025-07-22 02:55:49] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: Redis: localhost:6379
+[2025-07-22 02:55:49] DEBUG: Checking PHP extensions...
+[2025-07-22 02:55:49] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:55:49] DEBUG: Extension redis: LOADED
+[2025-07-22 02:55:49] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:55:49] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:55:49] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:55:49] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:55:49] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:49] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:49] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:49] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:49] DEBUG: Redis object created
+[2025-07-22 02:55:49] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:49] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:49] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:55:49] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:55:49] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:55:49] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:55:49] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:55:49] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:55:49] DEBUG: === API Request Started ===
+[2025-07-22 02:55:49] DEBUG: Method: GET
+[2025-07-22 02:55:49] DEBUG: URI: /api/users/admin/stats
+[2025-07-22 02:55:49] DEBUG: Content-Type: not set
+[2025-07-22 02:55:49] DEBUG: JSON headers set
+[2025-07-22 02:55:49] DEBUG: JSON test successful: {"test":"success","timestamp":1753152949}...
+[2025-07-22 02:55:49] DEBUG: Initializing TaskManager...
+[2025-07-22 02:55:49] DEBUG: TaskManager constructor called
+[2025-07-22 02:55:49] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:49] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:49] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:49] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:49] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:49] DEBUG: Redis object created
+[2025-07-22 02:55:49] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:49] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:49] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:55:49] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:55:49] DEBUG: TaskManager created successfully
+[2025-07-22 02:55:49] DEBUG: Raw input length: 0
+[2025-07-22 02:55:49] DEBUG: Raw input preview: 
+[2025-07-22 02:55:49] DEBUG: === Starting route matching ===
+[2025-07-22 02:55:49] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:55:49] DEBUG: Testing route: GET /api/tasks against /api/users/admin/stats with pattern: #^/api/tasks$#
+[2025-07-22 02:55:49] DEBUG: Testing route: GET /api/users/([^/]+)/stats against /api/users/admin/stats with pattern: #^/api/users/([^/]+)/stats$#
+[2025-07-22 02:55:49] DEBUG: Route matched! Calling handler: getUserStats
+[2025-07-22 02:55:49] DEBUG: === getUserStats called ===
+[2025-07-22 02:55:49] DEBUG: User ID: admin
+[2025-07-22 02:55:49] DEBUG: getUserStats called for user: admin
+[2025-07-22 02:55:49] DEBUG: User stats found in cache
+[2025-07-22 02:55:49] DEBUG: Stats retrieved: {"total":4,"pending":3,"in_progress":0,"completed":1}
+[2025-07-22 02:55:49] DEBUG: Handler completed successfully
+[2025-07-22 02:55:49] DEBUG: === API Request Complete ===
+[2025-07-22 02:55:53] ROUTER: === Router called ===
+[2025-07-22 02:55:53] ROUTER: Request URI: /api/users/admin/stats
+[2025-07-22 02:55:53] ROUTER: Parsed path: /api/users/admin/stats
+[2025-07-22 02:55:53] ROUTER: Method: GET
+[2025-07-22 02:55:53] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:55:53] DEBUG: === Config.php loaded ===
+[2025-07-22 02:55:53] DEBUG: SAPI: cli-server
+[2025-07-22 02:55:53] DEBUG: Request URI: /api/users/admin/stats
+[2025-07-22 02:55:53] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:55:53] DEBUG: Redis: localhost:6379
+[2025-07-22 02:55:53] DEBUG: Checking PHP extensions...
+[2025-07-22 02:55:53] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:55:53] DEBUG: Extension redis: LOADED
+[2025-07-22 02:55:53] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:55:53] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:55:53] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:55:53] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:55:53] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:53] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:53] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:53] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:53] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:53] DEBUG: Redis object created
+[2025-07-22 02:55:53] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:53] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:53] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:55:53] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:55:53] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:55:53] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:55:53] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:55:53] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:55:53] DEBUG: === API Request Started ===
+[2025-07-22 02:55:53] DEBUG: Method: GET
+[2025-07-22 02:55:53] DEBUG: URI: /api/users/admin/stats
+[2025-07-22 02:55:53] DEBUG: Content-Type: not set
+[2025-07-22 02:55:53] DEBUG: JSON headers set
+[2025-07-22 02:55:53] DEBUG: JSON test successful: {"test":"success","timestamp":1753152953}...
+[2025-07-22 02:55:53] DEBUG: Initializing TaskManager...
+[2025-07-22 02:55:53] DEBUG: TaskManager constructor called
+[2025-07-22 02:55:53] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:53] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:53] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:53] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:53] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:53] DEBUG: Redis object created
+[2025-07-22 02:55:53] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:53] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:53] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:55:53] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:55:53] DEBUG: TaskManager created successfully
+[2025-07-22 02:55:53] DEBUG: Raw input length: 0
+[2025-07-22 02:55:53] DEBUG: Raw input preview: 
+[2025-07-22 02:55:53] DEBUG: === Starting route matching ===
+[2025-07-22 02:55:53] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:55:53] DEBUG: Testing route: GET /api/tasks against /api/users/admin/stats with pattern: #^/api/tasks$#
+[2025-07-22 02:55:53] DEBUG: Testing route: GET /api/users/([^/]+)/stats against /api/users/admin/stats with pattern: #^/api/users/([^/]+)/stats$#
+[2025-07-22 02:55:53] DEBUG: Route matched! Calling handler: getUserStats
+[2025-07-22 02:55:53] DEBUG: === getUserStats called ===
+[2025-07-22 02:55:53] DEBUG: User ID: admin
+[2025-07-22 02:55:53] DEBUG: getUserStats called for user: admin
+[2025-07-22 02:55:53] DEBUG: User stats found in cache
+[2025-07-22 02:55:53] DEBUG: Stats retrieved: {"total":4,"pending":3,"in_progress":0,"completed":1}
+[2025-07-22 02:55:53] DEBUG: Handler completed successfully
+[2025-07-22 02:55:53] DEBUG: === API Request Complete ===
+[2025-07-22 02:55:53] ROUTER: === Router called ===
+[2025-07-22 02:55:53] ROUTER: Request URI: /api/tasks
+[2025-07-22 02:55:53] ROUTER: Parsed path: /api/tasks
+[2025-07-22 02:55:53] ROUTER: Method: GET
+[2025-07-22 02:55:53] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:55:53] DEBUG: === Config.php loaded ===
+[2025-07-22 02:55:53] DEBUG: SAPI: cli-server
+[2025-07-22 02:55:53] DEBUG: Request URI: /api/tasks
+[2025-07-22 02:55:53] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:55:53] DEBUG: Redis: localhost:6379
+[2025-07-22 02:55:53] DEBUG: Checking PHP extensions...
+[2025-07-22 02:55:53] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:55:53] DEBUG: Extension redis: LOADED
+[2025-07-22 02:55:53] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:55:53] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:55:53] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:55:53] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:55:53] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:53] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:53] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:53] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:53] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:53] DEBUG: Redis object created
+[2025-07-22 02:55:53] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:53] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:53] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:55:53] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:55:53] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:55:53] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:55:53] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:55:53] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:55:53] DEBUG: === API Request Started ===
+[2025-07-22 02:55:53] DEBUG: Method: GET
+[2025-07-22 02:55:53] DEBUG: URI: /api/tasks
+[2025-07-22 02:55:53] DEBUG: Content-Type: not set
+[2025-07-22 02:55:53] DEBUG: JSON headers set
+[2025-07-22 02:55:53] DEBUG: JSON test successful: {"test":"success","timestamp":1753152953}...
+[2025-07-22 02:55:53] DEBUG: Initializing TaskManager...
+[2025-07-22 02:55:53] DEBUG: TaskManager constructor called
+[2025-07-22 02:55:53] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:55:53] DEBUG: Using non-authenticated connection
+[2025-07-22 02:55:53] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:55:53] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:55:53] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:55:53] DEBUG: Redis object created
+[2025-07-22 02:55:53] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:55:53] DEBUG: Redis ping result: 1
+[2025-07-22 02:55:53] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:55:53] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:55:53] DEBUG: TaskManager created successfully
+[2025-07-22 02:55:53] DEBUG: Raw input length: 0
+[2025-07-22 02:55:53] DEBUG: Raw input preview: 
+[2025-07-22 02:55:53] DEBUG: === Starting route matching ===
+[2025-07-22 02:55:53] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:55:53] DEBUG: Testing route: GET /api/tasks against /api/tasks with pattern: #^/api/tasks$#
+[2025-07-22 02:55:53] DEBUG: Route matched! Calling handler: getTasks
+[2025-07-22 02:55:53] DEBUG: === getTasks called ===
+[2025-07-22 02:55:53] DEBUG: getAllTasks called with useCache=1
+[2025-07-22 02:55:53] DEBUG: Checking Redis cache for tasks
+[2025-07-22 02:55:53] DEBUG: Tasks found in cache, returning cached data
+[2025-07-22 02:55:53] DEBUG: Tasks retrieved: 11 items
+[2025-07-22 02:55:53] DEBUG: Response prepared, outputting JSON...
+[2025-07-22 02:55:53] DEBUG: JSON output complete
+[2025-07-22 02:55:53] DEBUG: Handler completed successfully
+[2025-07-22 02:55:53] DEBUG: === API Request Complete ===
+[2025-07-22 02:56:05] ROUTER: === Router called ===
+[2025-07-22 02:56:05] ROUTER: Request URI: /api/tasks/687efdb5e47f033902040622/status
+[2025-07-22 02:56:05] ROUTER: Parsed path: /api/tasks/687efdb5e47f033902040622/status
+[2025-07-22 02:56:05] ROUTER: Method: PUT
+[2025-07-22 02:56:05] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:56:05] DEBUG: === Config.php loaded ===
+[2025-07-22 02:56:05] DEBUG: SAPI: cli-server
+[2025-07-22 02:56:05] DEBUG: Request URI: /api/tasks/687efdb5e47f033902040622/status
+[2025-07-22 02:56:05] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: Redis: localhost:6379
+[2025-07-22 02:56:05] DEBUG: Checking PHP extensions...
+[2025-07-22 02:56:05] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:56:05] DEBUG: Extension redis: LOADED
+[2025-07-22 02:56:05] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:56:05] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:56:05] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:56:05] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:56:05] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:05] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:05] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:05] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:05] DEBUG: Redis object created
+[2025-07-22 02:56:05] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:05] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:05] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:56:05] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:56:05] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:56:05] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:56:05] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:56:05] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:56:05] DEBUG: === API Request Started ===
+[2025-07-22 02:56:05] DEBUG: Method: PUT
+[2025-07-22 02:56:05] DEBUG: URI: /api/tasks/687efdb5e47f033902040622/status
+[2025-07-22 02:56:05] DEBUG: Content-Type: application/json
+[2025-07-22 02:56:05] DEBUG: JSON headers set
+[2025-07-22 02:56:05] DEBUG: JSON test successful: {"test":"success","timestamp":1753152965}...
+[2025-07-22 02:56:05] DEBUG: Initializing TaskManager...
+[2025-07-22 02:56:05] DEBUG: TaskManager constructor called
+[2025-07-22 02:56:05] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:05] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:05] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:05] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:05] DEBUG: Redis object created
+[2025-07-22 02:56:05] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:05] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:05] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:56:05] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:56:05] DEBUG: TaskManager created successfully
+[2025-07-22 02:56:05] DEBUG: Raw input length: 24
+[2025-07-22 02:56:05] DEBUG: Raw input preview: {"status":"in_progress"}
+[2025-07-22 02:56:05] DEBUG: Input decoded successfully: {"status":"in_progress"}
+[2025-07-22 02:56:05] DEBUG: === Starting route matching ===
+[2025-07-22 02:56:05] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:56:05] DEBUG: Testing route: PUT /api/tasks/([^/]+)/status against /api/tasks/687efdb5e47f033902040622/status with pattern: #^/api/tasks/([^/]+)/status$#
+[2025-07-22 02:56:05] DEBUG: Route matched! Calling handler: updateTaskStatus
+[2025-07-22 02:56:05] DEBUG: === updateTaskStatus called ===
+[2025-07-22 02:56:05] DEBUG: Task ID: 687efdb5e47f033902040622
+[2025-07-22 02:56:05] DEBUG: Input: {"status":"in_progress"}
+[2025-07-22 02:56:05] DEBUG: updateTaskStatus called: taskId='687efdb5e47f033902040622', status='in_progress'
+[2025-07-22 02:56:05] DEBUG: Updating task in MongoDB
+[2025-07-22 02:56:05] DEBUG: Task update result: 1 documents modified
+[2025-07-22 02:56:05] DEBUG: Task cache cleared after update
+[2025-07-22 02:56:05] DEBUG: Task status updated successfully
+[2025-07-22 02:56:05] DEBUG: logUserActivity called: user='anonymous', action='update_task_status'
+[2025-07-22 02:56:05] DEBUG: Logging activity to MongoDB
+[2025-07-22 02:56:05] DEBUG: Activity logged successfully
+[2025-07-22 02:56:05] DEBUG: Handler completed successfully
+[2025-07-22 02:56:05] DEBUG: === API Request Complete ===
+[2025-07-22 02:56:05] ROUTER: === Router called ===
+[2025-07-22 02:56:05] ROUTER: Request URI: /api/tasks
+[2025-07-22 02:56:05] ROUTER: Parsed path: /api/tasks
+[2025-07-22 02:56:05] ROUTER: Method: GET
+[2025-07-22 02:56:05] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:56:05] DEBUG: === Config.php loaded ===
+[2025-07-22 02:56:05] DEBUG: SAPI: cli-server
+[2025-07-22 02:56:05] DEBUG: Request URI: /api/tasks
+[2025-07-22 02:56:05] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: Redis: localhost:6379
+[2025-07-22 02:56:05] DEBUG: Checking PHP extensions...
+[2025-07-22 02:56:05] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:56:05] DEBUG: Extension redis: LOADED
+[2025-07-22 02:56:05] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:56:05] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:56:05] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:56:05] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:56:05] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:05] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:05] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:05] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:05] DEBUG: Redis object created
+[2025-07-22 02:56:05] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:05] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:05] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:56:05] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:56:05] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:56:05] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:56:05] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:56:05] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:56:05] DEBUG: === API Request Started ===
+[2025-07-22 02:56:05] DEBUG: Method: GET
+[2025-07-22 02:56:05] DEBUG: URI: /api/tasks
+[2025-07-22 02:56:05] DEBUG: Content-Type: not set
+[2025-07-22 02:56:05] DEBUG: JSON headers set
+[2025-07-22 02:56:05] DEBUG: JSON test successful: {"test":"success","timestamp":1753152965}...
+[2025-07-22 02:56:05] DEBUG: Initializing TaskManager...
+[2025-07-22 02:56:05] DEBUG: TaskManager constructor called
+[2025-07-22 02:56:05] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:05] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:05] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:05] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:05] DEBUG: Redis object created
+[2025-07-22 02:56:05] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:05] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:05] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:56:05] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:56:05] DEBUG: TaskManager created successfully
+[2025-07-22 02:56:05] DEBUG: Raw input length: 0
+[2025-07-22 02:56:05] DEBUG: Raw input preview: 
+[2025-07-22 02:56:05] DEBUG: === Starting route matching ===
+[2025-07-22 02:56:05] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:56:05] DEBUG: Testing route: GET /api/tasks against /api/tasks with pattern: #^/api/tasks$#
+[2025-07-22 02:56:05] DEBUG: Route matched! Calling handler: getTasks
+[2025-07-22 02:56:05] DEBUG: === getTasks called ===
+[2025-07-22 02:56:05] DEBUG: getAllTasks called with useCache=1
+[2025-07-22 02:56:05] DEBUG: Checking Redis cache for tasks
+[2025-07-22 02:56:05] DEBUG: No cached tasks found
+[2025-07-22 02:56:05] DEBUG: Querying MongoDB for tasks
+[2025-07-22 02:56:05] DEBUG: Collection selected: tasks
+[2025-07-22 02:56:05] DEBUG: MongoDB query executed
+[2025-07-22 02:56:05] DEBUG: Processed 11 tasks from MongoDB
+[2025-07-22 02:56:05] DEBUG: Tasks cached in Redis
+[2025-07-22 02:56:05] DEBUG: Tasks retrieved: 11 items
+[2025-07-22 02:56:05] DEBUG: Response prepared, outputting JSON...
+[2025-07-22 02:56:05] DEBUG: JSON output complete
+[2025-07-22 02:56:05] DEBUG: Handler completed successfully
+[2025-07-22 02:56:05] DEBUG: === API Request Complete ===
+[2025-07-22 02:56:05] ROUTER: === Router called ===
+[2025-07-22 02:56:05] ROUTER: Request URI: /api/users/admin/stats
+[2025-07-22 02:56:05] ROUTER: Parsed path: /api/users/admin/stats
+[2025-07-22 02:56:05] ROUTER: Method: GET
+[2025-07-22 02:56:05] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:56:05] DEBUG: === Config.php loaded ===
+[2025-07-22 02:56:05] DEBUG: SAPI: cli-server
+[2025-07-22 02:56:05] DEBUG: Request URI: /api/users/admin/stats
+[2025-07-22 02:56:05] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: Redis: localhost:6379
+[2025-07-22 02:56:05] DEBUG: Checking PHP extensions...
+[2025-07-22 02:56:05] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:56:05] DEBUG: Extension redis: LOADED
+[2025-07-22 02:56:05] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:56:05] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:56:05] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:56:05] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:56:05] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:05] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:05] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:05] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:05] DEBUG: Redis object created
+[2025-07-22 02:56:05] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:05] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:05] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:56:05] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:56:05] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:56:05] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:56:05] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:56:05] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:56:05] DEBUG: === API Request Started ===
+[2025-07-22 02:56:05] DEBUG: Method: GET
+[2025-07-22 02:56:05] DEBUG: URI: /api/users/admin/stats
+[2025-07-22 02:56:05] DEBUG: Content-Type: not set
+[2025-07-22 02:56:05] DEBUG: JSON headers set
+[2025-07-22 02:56:05] DEBUG: JSON test successful: {"test":"success","timestamp":1753152965}...
+[2025-07-22 02:56:05] DEBUG: Initializing TaskManager...
+[2025-07-22 02:56:05] DEBUG: TaskManager constructor called
+[2025-07-22 02:56:05] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:05] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:05] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:05] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:05] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:05] DEBUG: Redis object created
+[2025-07-22 02:56:05] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:05] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:05] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:56:05] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:56:05] DEBUG: TaskManager created successfully
+[2025-07-22 02:56:05] DEBUG: Raw input length: 0
+[2025-07-22 02:56:05] DEBUG: Raw input preview: 
+[2025-07-22 02:56:05] DEBUG: === Starting route matching ===
+[2025-07-22 02:56:05] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:56:05] DEBUG: Testing route: GET /api/tasks against /api/users/admin/stats with pattern: #^/api/tasks$#
+[2025-07-22 02:56:05] DEBUG: Testing route: GET /api/users/([^/]+)/stats against /api/users/admin/stats with pattern: #^/api/users/([^/]+)/stats$#
+[2025-07-22 02:56:05] DEBUG: Route matched! Calling handler: getUserStats
+[2025-07-22 02:56:05] DEBUG: === getUserStats called ===
+[2025-07-22 02:56:05] DEBUG: User ID: admin
+[2025-07-22 02:56:05] DEBUG: getUserStats called for user: admin
+[2025-07-22 02:56:05] DEBUG: User stats found in cache
+[2025-07-22 02:56:05] DEBUG: Stats retrieved: {"total":4,"pending":3,"in_progress":0,"completed":1}
+[2025-07-22 02:56:05] DEBUG: Handler completed successfully
+[2025-07-22 02:56:05] DEBUG: === API Request Complete ===
+[2025-07-22 02:56:12] ROUTER: === Router called ===
+[2025-07-22 02:56:12] ROUTER: Request URI: /api/tasks/687efdb5e47f033902040622/status
+[2025-07-22 02:56:12] ROUTER: Parsed path: /api/tasks/687efdb5e47f033902040622/status
+[2025-07-22 02:56:12] ROUTER: Method: PUT
+[2025-07-22 02:56:12] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:56:12] DEBUG: === Config.php loaded ===
+[2025-07-22 02:56:12] DEBUG: SAPI: cli-server
+[2025-07-22 02:56:12] DEBUG: Request URI: /api/tasks/687efdb5e47f033902040622/status
+[2025-07-22 02:56:12] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: Redis: localhost:6379
+[2025-07-22 02:56:12] DEBUG: Checking PHP extensions...
+[2025-07-22 02:56:12] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:56:12] DEBUG: Extension redis: LOADED
+[2025-07-22 02:56:12] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:56:12] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:56:12] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:56:12] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:56:12] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:12] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:12] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:12] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:12] DEBUG: Redis object created
+[2025-07-22 02:56:12] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:12] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:12] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:56:12] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:56:12] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:56:12] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:56:12] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:56:12] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:56:12] DEBUG: === API Request Started ===
+[2025-07-22 02:56:12] DEBUG: Method: PUT
+[2025-07-22 02:56:12] DEBUG: URI: /api/tasks/687efdb5e47f033902040622/status
+[2025-07-22 02:56:12] DEBUG: Content-Type: application/json
+[2025-07-22 02:56:12] DEBUG: JSON headers set
+[2025-07-22 02:56:12] DEBUG: JSON test successful: {"test":"success","timestamp":1753152972}...
+[2025-07-22 02:56:12] DEBUG: Initializing TaskManager...
+[2025-07-22 02:56:12] DEBUG: TaskManager constructor called
+[2025-07-22 02:56:12] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:12] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:12] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:12] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:12] DEBUG: Redis object created
+[2025-07-22 02:56:12] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:12] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:12] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:56:12] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:56:12] DEBUG: TaskManager created successfully
+[2025-07-22 02:56:12] DEBUG: Raw input length: 22
+[2025-07-22 02:56:12] DEBUG: Raw input preview: {"status":"completed"}
+[2025-07-22 02:56:12] DEBUG: Input decoded successfully: {"status":"completed"}
+[2025-07-22 02:56:12] DEBUG: === Starting route matching ===
+[2025-07-22 02:56:12] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:56:12] DEBUG: Testing route: PUT /api/tasks/([^/]+)/status against /api/tasks/687efdb5e47f033902040622/status with pattern: #^/api/tasks/([^/]+)/status$#
+[2025-07-22 02:56:12] DEBUG: Route matched! Calling handler: updateTaskStatus
+[2025-07-22 02:56:12] DEBUG: === updateTaskStatus called ===
+[2025-07-22 02:56:12] DEBUG: Task ID: 687efdb5e47f033902040622
+[2025-07-22 02:56:12] DEBUG: Input: {"status":"completed"}
+[2025-07-22 02:56:12] DEBUG: updateTaskStatus called: taskId='687efdb5e47f033902040622', status='completed'
+[2025-07-22 02:56:12] DEBUG: Updating task in MongoDB
+[2025-07-22 02:56:12] DEBUG: Task update result: 1 documents modified
+[2025-07-22 02:56:12] DEBUG: Task cache cleared after update
+[2025-07-22 02:56:12] DEBUG: Task status updated successfully
+[2025-07-22 02:56:12] DEBUG: logUserActivity called: user='anonymous', action='update_task_status'
+[2025-07-22 02:56:12] DEBUG: Logging activity to MongoDB
+[2025-07-22 02:56:12] DEBUG: Activity logged successfully
+[2025-07-22 02:56:12] DEBUG: Handler completed successfully
+[2025-07-22 02:56:12] DEBUG: === API Request Complete ===
+[2025-07-22 02:56:12] ROUTER: === Router called ===
+[2025-07-22 02:56:12] ROUTER: Request URI: /api/tasks
+[2025-07-22 02:56:12] ROUTER: Parsed path: /api/tasks
+[2025-07-22 02:56:12] ROUTER: Method: GET
+[2025-07-22 02:56:12] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:56:12] DEBUG: === Config.php loaded ===
+[2025-07-22 02:56:12] DEBUG: SAPI: cli-server
+[2025-07-22 02:56:12] DEBUG: Request URI: /api/tasks
+[2025-07-22 02:56:12] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: Redis: localhost:6379
+[2025-07-22 02:56:12] DEBUG: Checking PHP extensions...
+[2025-07-22 02:56:12] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:56:12] DEBUG: Extension redis: LOADED
+[2025-07-22 02:56:12] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:56:12] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:56:12] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:56:12] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:56:12] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:12] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:12] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:12] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:12] DEBUG: Redis object created
+[2025-07-22 02:56:12] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:12] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:12] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:56:12] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:56:12] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:56:12] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:56:12] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:56:12] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:56:12] DEBUG: === API Request Started ===
+[2025-07-22 02:56:12] DEBUG: Method: GET
+[2025-07-22 02:56:12] DEBUG: URI: /api/tasks
+[2025-07-22 02:56:12] DEBUG: Content-Type: not set
+[2025-07-22 02:56:12] DEBUG: JSON headers set
+[2025-07-22 02:56:12] DEBUG: JSON test successful: {"test":"success","timestamp":1753152972}...
+[2025-07-22 02:56:12] DEBUG: Initializing TaskManager...
+[2025-07-22 02:56:12] DEBUG: TaskManager constructor called
+[2025-07-22 02:56:12] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:12] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:12] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:12] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:12] DEBUG: Redis object created
+[2025-07-22 02:56:12] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:12] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:12] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:56:12] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:56:12] DEBUG: TaskManager created successfully
+[2025-07-22 02:56:12] DEBUG: Raw input length: 0
+[2025-07-22 02:56:12] DEBUG: Raw input preview: 
+[2025-07-22 02:56:12] DEBUG: === Starting route matching ===
+[2025-07-22 02:56:12] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:56:12] DEBUG: Testing route: GET /api/tasks against /api/tasks with pattern: #^/api/tasks$#
+[2025-07-22 02:56:12] DEBUG: Route matched! Calling handler: getTasks
+[2025-07-22 02:56:12] DEBUG: === getTasks called ===
+[2025-07-22 02:56:12] DEBUG: getAllTasks called with useCache=1
+[2025-07-22 02:56:12] DEBUG: Checking Redis cache for tasks
+[2025-07-22 02:56:12] DEBUG: No cached tasks found
+[2025-07-22 02:56:12] DEBUG: Querying MongoDB for tasks
+[2025-07-22 02:56:12] DEBUG: Collection selected: tasks
+[2025-07-22 02:56:12] DEBUG: MongoDB query executed
+[2025-07-22 02:56:12] DEBUG: Processed 11 tasks from MongoDB
+[2025-07-22 02:56:12] DEBUG: Tasks cached in Redis
+[2025-07-22 02:56:12] DEBUG: Tasks retrieved: 11 items
+[2025-07-22 02:56:12] DEBUG: Response prepared, outputting JSON...
+[2025-07-22 02:56:12] DEBUG: JSON output complete
+[2025-07-22 02:56:12] DEBUG: Handler completed successfully
+[2025-07-22 02:56:12] DEBUG: === API Request Complete ===
+[2025-07-22 02:56:12] ROUTER: === Router called ===
+[2025-07-22 02:56:12] ROUTER: Request URI: /api/users/admin/stats
+[2025-07-22 02:56:12] ROUTER: Parsed path: /api/users/admin/stats
+[2025-07-22 02:56:12] ROUTER: Method: GET
+[2025-07-22 02:56:12] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:56:12] DEBUG: === Config.php loaded ===
+[2025-07-22 02:56:12] DEBUG: SAPI: cli-server
+[2025-07-22 02:56:12] DEBUG: Request URI: /api/users/admin/stats
+[2025-07-22 02:56:12] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: Redis: localhost:6379
+[2025-07-22 02:56:12] DEBUG: Checking PHP extensions...
+[2025-07-22 02:56:12] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:56:12] DEBUG: Extension redis: LOADED
+[2025-07-22 02:56:12] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:56:12] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:56:12] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:56:12] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:56:12] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:12] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:12] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:12] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:12] DEBUG: Redis object created
+[2025-07-22 02:56:12] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:12] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:12] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:56:12] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:56:12] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:56:12] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:56:12] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:56:12] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:56:12] DEBUG: === API Request Started ===
+[2025-07-22 02:56:12] DEBUG: Method: GET
+[2025-07-22 02:56:12] DEBUG: URI: /api/users/admin/stats
+[2025-07-22 02:56:12] DEBUG: Content-Type: not set
+[2025-07-22 02:56:12] DEBUG: JSON headers set
+[2025-07-22 02:56:12] DEBUG: JSON test successful: {"test":"success","timestamp":1753152972}...
+[2025-07-22 02:56:12] DEBUG: Initializing TaskManager...
+[2025-07-22 02:56:12] DEBUG: TaskManager constructor called
+[2025-07-22 02:56:12] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:12] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:12] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:12] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:12] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:12] DEBUG: Redis object created
+[2025-07-22 02:56:12] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:12] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:12] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:56:12] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:56:12] DEBUG: TaskManager created successfully
+[2025-07-22 02:56:12] DEBUG: Raw input length: 0
+[2025-07-22 02:56:12] DEBUG: Raw input preview: 
+[2025-07-22 02:56:12] DEBUG: === Starting route matching ===
+[2025-07-22 02:56:12] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:56:12] DEBUG: Testing route: GET /api/tasks against /api/users/admin/stats with pattern: #^/api/tasks$#
+[2025-07-22 02:56:12] DEBUG: Testing route: GET /api/users/([^/]+)/stats against /api/users/admin/stats with pattern: #^/api/users/([^/]+)/stats$#
+[2025-07-22 02:56:12] DEBUG: Route matched! Calling handler: getUserStats
+[2025-07-22 02:56:12] DEBUG: === getUserStats called ===
+[2025-07-22 02:56:12] DEBUG: User ID: admin
+[2025-07-22 02:56:12] DEBUG: getUserStats called for user: admin
+[2025-07-22 02:56:12] DEBUG: User stats found in cache
+[2025-07-22 02:56:12] DEBUG: Stats retrieved: {"total":4,"pending":3,"in_progress":0,"completed":1}
+[2025-07-22 02:56:12] DEBUG: Handler completed successfully
+[2025-07-22 02:56:12] DEBUG: === API Request Complete ===
+[2025-07-22 02:56:23] ROUTER: === Router called ===
+[2025-07-22 02:56:23] ROUTER: Request URI: /api/tasks
+[2025-07-22 02:56:23] ROUTER: Parsed path: /api/tasks
+[2025-07-22 02:56:23] ROUTER: Method: GET
+[2025-07-22 02:56:23] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:56:23] DEBUG: === Config.php loaded ===
+[2025-07-22 02:56:23] DEBUG: SAPI: cli-server
+[2025-07-22 02:56:23] DEBUG: Request URI: /api/tasks
+[2025-07-22 02:56:23] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:56:23] DEBUG: Redis: localhost:6379
+[2025-07-22 02:56:23] DEBUG: Checking PHP extensions...
+[2025-07-22 02:56:23] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:56:23] DEBUG: Extension redis: LOADED
+[2025-07-22 02:56:23] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:56:23] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:56:23] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:56:23] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:56:23] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:23] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:23] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:23] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:23] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:23] DEBUG: Redis object created
+[2025-07-22 02:56:23] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:23] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:23] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:56:23] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:56:23] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:56:23] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:56:23] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:56:23] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:56:23] DEBUG: === API Request Started ===
+[2025-07-22 02:56:23] DEBUG: Method: GET
+[2025-07-22 02:56:23] DEBUG: URI: /api/tasks
+[2025-07-22 02:56:23] DEBUG: Content-Type: not set
+[2025-07-22 02:56:23] DEBUG: JSON headers set
+[2025-07-22 02:56:23] DEBUG: JSON test successful: {"test":"success","timestamp":1753152983}...
+[2025-07-22 02:56:23] DEBUG: Initializing TaskManager...
+[2025-07-22 02:56:23] DEBUG: TaskManager constructor called
+[2025-07-22 02:56:23] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:23] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:23] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:23] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:23] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:23] DEBUG: Redis object created
+[2025-07-22 02:56:23] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:23] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:23] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:56:23] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:56:23] DEBUG: TaskManager created successfully
+[2025-07-22 02:56:23] DEBUG: Raw input length: 0
+[2025-07-22 02:56:23] DEBUG: Raw input preview: 
+[2025-07-22 02:56:23] DEBUG: === Starting route matching ===
+[2025-07-22 02:56:23] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:56:23] DEBUG: Testing route: GET /api/tasks against /api/tasks with pattern: #^/api/tasks$#
+[2025-07-22 02:56:23] DEBUG: Route matched! Calling handler: getTasks
+[2025-07-22 02:56:23] DEBUG: === getTasks called ===
+[2025-07-22 02:56:23] DEBUG: getAllTasks called with useCache=1
+[2025-07-22 02:56:23] DEBUG: Checking Redis cache for tasks
+[2025-07-22 02:56:23] DEBUG: Tasks found in cache, returning cached data
+[2025-07-22 02:56:23] DEBUG: Tasks retrieved: 11 items
+[2025-07-22 02:56:23] DEBUG: Response prepared, outputting JSON...
+[2025-07-22 02:56:23] DEBUG: JSON output complete
+[2025-07-22 02:56:23] DEBUG: Handler completed successfully
+[2025-07-22 02:56:23] DEBUG: === API Request Complete ===
+[2025-07-22 02:56:23] ROUTER: === Router called ===
+[2025-07-22 02:56:23] ROUTER: Request URI: /api/users/admin/stats
+[2025-07-22 02:56:23] ROUTER: Parsed path: /api/users/admin/stats
+[2025-07-22 02:56:23] ROUTER: Method: GET
+[2025-07-22 02:56:23] ROUTER: API route detected, forwarding to api.php
+[2025-07-22 02:56:23] DEBUG: === Config.php loaded ===
+[2025-07-22 02:56:23] DEBUG: SAPI: cli-server
+[2025-07-22 02:56:23] DEBUG: Request URI: /api/users/admin/stats
+[2025-07-22 02:56:23] DEBUG: Configuration loaded - MongoDB: localhost:27017/taskapp
+[2025-07-22 02:56:23] DEBUG: Redis: localhost:6379
+[2025-07-22 02:56:23] DEBUG: Checking PHP extensions...
+[2025-07-22 02:56:23] DEBUG: Extension mongodb: LOADED
+[2025-07-22 02:56:23] DEBUG: Extension redis: LOADED
+[2025-07-22 02:56:23] DEBUG: Checking for MongoDB Composer library...
+[2025-07-22 02:56:23] DEBUG: Found Composer autoloader at: /home/administrator/Docker-Workshop/assets/lab/web/vendor/autoload.php
+[2025-07-22 02:56:23] DEBUG: MongoDB\Client class: LOADED via Composer
+[2025-07-22 02:56:23] DEBUG: === Testing connections on config load ===
+[2025-07-22 02:56:23] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:23] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:23] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:23] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:23] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:23] DEBUG: Redis object created
+[2025-07-22 02:56:23] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:23] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:23] DEBUG: MongoDB connection test: SUCCESS
+[2025-07-22 02:56:23] DEBUG: Redis connection test: SUCCESS
+[2025-07-22 02:56:23] DEBUG: Configuring Redis sessions...
+[2025-07-22 02:56:23] DEBUG: Redis session path: tcp://localhost:6379
+[2025-07-22 02:56:23] DEBUG: Session started successfully. Session ID: 3feqb79q07c0ptqrt142ns1p0c
+[2025-07-22 02:56:23] DEBUG: === Config.php initialization complete ===
+[2025-07-22 02:56:23] DEBUG: === API Request Started ===
+[2025-07-22 02:56:23] DEBUG: Method: GET
+[2025-07-22 02:56:23] DEBUG: URI: /api/users/admin/stats
+[2025-07-22 02:56:23] DEBUG: Content-Type: not set
+[2025-07-22 02:56:23] DEBUG: JSON headers set
+[2025-07-22 02:56:23] DEBUG: JSON test successful: {"test":"success","timestamp":1753152983}...
+[2025-07-22 02:56:23] DEBUG: Initializing TaskManager...
+[2025-07-22 02:56:23] DEBUG: TaskManager constructor called
+[2025-07-22 02:56:23] DEBUG: === Attempting MongoDB connection ===
+[2025-07-22 02:56:23] DEBUG: Using non-authenticated connection
+[2025-07-22 02:56:23] DEBUG: Connection string: mongodb://localhost:27017/taskapp
+[2025-07-22 02:56:23] DEBUG: MongoDB ping successful: [{"ok":1}]
+[2025-07-22 02:56:23] DEBUG: === Attempting Redis connection ===
+[2025-07-22 02:56:23] DEBUG: Redis object created
+[2025-07-22 02:56:23] DEBUG: Redis connected to localhost:6379
+[2025-07-22 02:56:23] DEBUG: Redis ping result: 1
+[2025-07-22 02:56:23] DEBUG: TaskManager initialized - MongoDB: OK
+[2025-07-22 02:56:23] DEBUG: TaskManager initialized - Redis: OK
+[2025-07-22 02:56:23] DEBUG: TaskManager created successfully
+[2025-07-22 02:56:23] DEBUG: Raw input length: 0
+[2025-07-22 02:56:23] DEBUG: Raw input preview: 
+[2025-07-22 02:56:23] DEBUG: === Starting route matching ===
+[2025-07-22 02:56:23] DEBUG: Available routes: ["GET \/api\/tasks","POST \/api\/tasks","PUT \/api\/tasks\/([^\/]+)\/status","DELETE \/api\/tasks\/([^\/]+)","GET \/api\/users\/([^\/]+)\/stats","POST \/api\/upload"]
+[2025-07-22 02:56:23] DEBUG: Testing route: GET /api/tasks against /api/users/admin/stats with pattern: #^/api/tasks$#
+[2025-07-22 02:56:23] DEBUG: Testing route: GET /api/users/([^/]+)/stats against /api/users/admin/stats with pattern: #^/api/users/([^/]+)/stats$#
+[2025-07-22 02:56:23] DEBUG: Route matched! Calling handler: getUserStats
+[2025-07-22 02:56:23] DEBUG: === getUserStats called ===
+[2025-07-22 02:56:23] DEBUG: User ID: admin
+[2025-07-22 02:56:23] DEBUG: getUserStats called for user: admin
+[2025-07-22 02:56:23] DEBUG: User stats found in cache
+[2025-07-22 02:56:23] DEBUG: Stats retrieved: {"total":4,"pending":3,"in_progress":0,"completed":1}
+[2025-07-22 02:56:23] DEBUG: Handler completed successfully
+[2025-07-22 02:56:23] DEBUG: === API Request Complete ===
