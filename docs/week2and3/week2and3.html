@@ -79,7 +79,7 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="index.html">CCDC Container Workshop</a>
+        <a class="navbar-brand" href="../index.html">CCDC Container Workshop</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -106,6 +106,9 @@
                 href="week2and3.html"
                 >Week 2 & 3</a
               >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="../week4/week4.html">Week 4</a>
             </li>
           </ul>
         </div>
@@ -3911,7 +3914,9 @@ docker exec taskmanager-web ls -la /var/www/html/uploads/</code></pre>
                     <li>
                       Verify network connectivity:
                       <code
-                        >docker exec taskmanager-web apt install -y iputils-ping; ping -c3 taskmanager-mongodb</code>
+                        >docker exec taskmanager-web nc -zv taskmanager-mongodb
+                        27017</code
+                      >
                     </li>
                     <li>
                       Update connection string in config.php to use container
