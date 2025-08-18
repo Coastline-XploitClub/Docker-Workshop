@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile.secure
+    image: secure-app:latest
+    read_only: true
+    user: "1001:1001"
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+      - apparmor:docker-default
+    tmpfs:
+      - /tmp:size=100M
+      - /var/run:size=100M
+    secrets:
+      - api_key
+      - db_password
+    environment:
+      - NODE_ENV=production
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "3000:3000"
+
+secrets:
+  api_key:
+    external: true
+  db_password:
+    external: true

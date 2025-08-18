@@ -1,0 +1,17 @@
+{
+  "name": "vulnerable-app",
+  "version": "1.0.0",
+  "description": "Intentionally vulnerable Node.js app for security training",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "4.17.1",
+    "lodash": "4.17.19",
+    "morgan": "1.9.1"
+  },
+  "author": "CCDC Security Training",
+  "license": "MIT"
+}

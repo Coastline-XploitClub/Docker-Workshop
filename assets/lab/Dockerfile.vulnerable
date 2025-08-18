@@ -1,0 +1,12 @@
+# Intentionally vulnerable Dockerfile for security training
+FROM node:10
+ENV API_KEY=sk-1234567890abcdef
+ENV DATABASE_PASSWORD=admin123
+ENV SECRET_TOKEN=jwt-secret-key-do-not-share
+RUN apt-get update && apt-get install -y ssh curl wget gcc netcat telnet
+COPY . /app
+WORKDIR /app
+RUN npm install
+EXPOSE 22 3000 8080
+USER root
+CMD ["node", "app.js"]
