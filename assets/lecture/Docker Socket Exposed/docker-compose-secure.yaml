@@ -2,7 +2,7 @@ services:
   # SECURE: IT Troubleshooting container with minimal privileges
   # ✅ This shows how to provide IT troubleshooting access WITHOUT security risks
   it-troubleshooting:
-    image: alpine:latest
+    image: ubuntu:latest
     container_name: it-troubleshoot-secure
 
     # ✅ SECURE: Run as non-root user with minimal privileges
@@ -18,8 +18,9 @@ services:
 
     # Install same troubleshooting tools but with limited access
     command: |
-      sh -c "
-      apk add --no-cache curl wget htop procps net-tools &&
+      bash -c "
+      apt-get update &&
+      apt-get install -y curl wget htop procps net-tools &&
       echo 'IT Troubleshooting container ready - Secure limited access' &&
       echo 'Use: docker exec -it <container> <command> from host for container access' &&
       tail -f /dev/null
