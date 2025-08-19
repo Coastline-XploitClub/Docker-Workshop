@@ -1,0 +1,39 @@
+FROM ubuntu:20.04
+
+# Install nginx and python3
+RUN apt-get update && apt-get install -y nginx python3
+
+# Create non-root user and group with specific UID/GID for consistency
+RUN groupadd -g 1001 appgroup && \
+    useradd -u 1001 -g appgroup -m -s /bin/bash appuser
+
+# Create necessary directories and set proper ownership
+# nginx needs these directories to run as non-root
+RUN mkdir -p /app /usr/share/nginx/html /var/log/nginx /var/cache/nginx /var/lib/nginx /run/nginx && \
+    chown -R appuser:appgroup /app /usr/share/nginx/html /var/log/nginx /var/cache/nginx /var/lib/nginx /run/nginx
+
+# Configure nginx to run on port 8080 and serve from correct directory
+RUN sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default && \
+    sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' /etc/nginx/sites-available/default && \
+    sed -i 's|root /var/www/html;|root /usr/share/nginx/html;|' /etc/nginx/sites-available/default
+
+# Set the user and group for nginx
+RUN sed -i 's|user www-data;|user appuser appgroup;|' /etc/nginx/nginx.conf && \
+    sed -i 's|pid /run/nginx.pid;|pid /run/nginx/nginx.pid;|' /etc/nginx/nginx.conf
+
+WORKDIR /app
+
+# Copy the security report generator with proper ownership
+COPY --chown=appuser:appgroup app.py .
+
+# Switch to non-root user for all subsequent operations
+USER appuser
+
+# Generate the security report as non-root user
+# This will demonstrate the security differences when running as non-root
+RUN python3 app.py
+
+EXPOSE 8080
+
+# Start nginx in foreground as non-root user
+CMD ["nginx", "-g", "daemon off;"]

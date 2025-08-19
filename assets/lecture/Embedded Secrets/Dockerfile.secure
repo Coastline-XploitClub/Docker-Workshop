@@ -1,0 +1,37 @@
+# syntax=docker/dockerfile:1
+# SECURE: Multi-stage build with BuildKit secrets that don't persist in layers
+
+# Build stage - secrets available during build but not in final image
+FROM python:3.9-slim AS builder
+WORKDIR /build
+
+# Mount secrets temporarily - not embedded in image layers
+RUN --mount=type=secret,id=api_key \
+    --mount=type=secret,id=db_password \
+    --mount=type=secret,id=aws_secret \
+    --mount=type=secret,id=jwt_secret \
+    echo "Build completed with mounted secrets (not embedded in layers)"
+
+# Runtime stage - clean image with no embedded secrets
+FROM python:3.9-slim AS runtime
+
+# Create non-root user
+RUN groupadd -g 1001 appgroup && \
+    useradd -u 1001 -g appgroup -m -s /bin/bash appuser
+
+WORKDIR /app
+RUN chown -R appuser:appgroup /app
+
+# Copy application only
+COPY --chown=appuser:appgroup app.py ./
+
+# Non-sensitive build configuration only
+ARG BUILD_ENV=production
+ENV BUILD_ENV=$BUILD_ENV
+
+USER appuser
+EXPOSE 8000
+
+# Runtime secrets injected via environment variables
+CMD ["sh", "-c", "python app.py && python -m http.server 8000"]
+

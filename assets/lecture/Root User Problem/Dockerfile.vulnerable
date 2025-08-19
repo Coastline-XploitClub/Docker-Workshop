@@ -1,0 +1,24 @@
+FROM ubuntu:20.04
+
+# Install nginx and python3
+RUN apt-get update && apt-get install -y nginx python3
+
+WORKDIR /app
+
+# Copy the security report generator
+COPY app.py .
+
+# Generate the security report
+RUN python3 app.py
+
+# Configure nginx to run on port 8080 and serve from correct directory
+RUN sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default && \
+    sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' /etc/nginx/sites-available/default && \
+    sed -i 's|root /var/www/html;|root /usr/share/nginx/html;|' /etc/nginx/sites-available/default
+
+EXPOSE 8080
+
+# Start nginx in foreground
+CMD ["nginx", "-g", "daemon off;"]
+
+# No USER directive - runs as root by default! 😱

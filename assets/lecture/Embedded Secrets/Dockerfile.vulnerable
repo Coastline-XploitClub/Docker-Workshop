@@ -1,0 +1,47 @@
+# VULNERABLE: Demonstrates how secrets remain in image layers!
+FROM python:3.9-slim
+
+# Create non-root user and group (following security best practices from previous lesson)
+# Even with proper user management, embedded secrets are STILL a critical vulnerability!
+RUN groupadd -g 1001 appgroup && \
+    useradd -u 1001 -g appgroup -m -s /bin/bash appuser
+
+# Set working directory and create with proper ownership
+WORKDIR /app
+RUN chown -R appuser:appgroup /app
+
+# Copy application files with proper ownership
+COPY --chown=appuser:appgroup app.py ./
+
+# VULNERABILITY #1: Writing secrets to filesystem in RUN command
+# Even though we delete the file later, the secret remains in this layer!
+# NOTE: This happens BEFORE switching to non-root user, showing how build-time secrets persist
+RUN echo "API_KEY=sk-1234567890abcdef-SUPER-SECRET-KEY-DO-NOT-EXPOSE" > /app/.env && \
+    echo "DATABASE_PASSWORD=admin123!VerySecretPassword" >> /app/.env && \
+    echo "AWS_SECRET_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE12345" >> /app/.env && \
+    echo "JWT_SECRET=my-super-secret-jwt-signing-key-2024" >> /app/.env
+
+# FUTILE ATTEMPT: Try to remove the secrets file
+# This creates a new layer but DOES NOT remove the secrets from previous layer!
+# The secrets remain accessible via docker history and layer extraction
+RUN rm -f /app/.env
+
+# VULNERABILITY #2: Hardcoded secrets in ENV directives  
+# These are directly visible in docker inspect output regardless of user context
+ENV ANOTHER_SECRET="hardcoded-secret-in-dockerfile-2024"
+ENV DB_CONNECTION_STRING="postgresql://admin:secret123@db:5432/myapp"
+
+# VULNERABILITY #3: Secrets in build arguments that become ENV variables
+ARG BUILD_SECRET="build-time-secret-becomes-visible"
+ENV BUILD_SECRET_EXPOSED=$BUILD_SECRET
+
+# Switch to non-root user for running the application (good security practice)
+# However, this DOES NOT protect against the embedded secrets vulnerability!
+USER appuser
+
+# Expose port for web server to view HTML report
+EXPOSE 8000
+
+# Generate the security report and then serve it via HTTP
+# This allows viewing the detailed HTML report in a browser
+CMD ["sh", "-c", "python app.py && python -m http.server 8000"]
