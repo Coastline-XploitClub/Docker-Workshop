@@ -1,4 +1,44 @@
 services:
+  # SECURE: IT Troubleshooting container with minimal privileges
+  # ✅ This shows how to provide IT troubleshooting access WITHOUT security risks
+  it-troubleshooting:
+    image: alpine:latest
+    container_name: it-troubleshoot-secure
+
+    # ✅ SECURE: Run as non-root user with minimal privileges
+    user: "1000:1000" # non-privileged user
+
+    # ✅ SECURE: Only mount what's actually needed for troubleshooting
+    volumes:
+      # Read-only access to container logs (not host logs)
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # NO Docker socket mount - use 'docker exec' from host instead
+      # NO host filesystem mount - troubleshoot via container tools only
+      # NO /proc or /sys mounts - use container's own namespace
+
+    # Install same troubleshooting tools but with limited access
+    command: |
+      sh -c "
+      apk add --no-cache curl wget htop procps net-tools &&
+      echo 'IT Troubleshooting container ready - Secure limited access' &&
+      echo 'Use: docker exec -it <container> <command> from host for container access' &&
+      tail -f /dev/null
+      "
+
+    restart: unless-stopped
+
+    # ✅ SECURE: Additional container hardening
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+
+    labels:
+      - "purpose=it-troubleshooting"
+      - "team=infrastructure"
+      - "security=hardened"
+
   # SECURE: Node Exporter for system monitoring
   # Demonstrates legitimate need for /proc and /sys access WITHOUT Docker socket
   node-exporter:

