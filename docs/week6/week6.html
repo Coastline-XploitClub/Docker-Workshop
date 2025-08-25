@@ -229,6 +229,51 @@
             This week focuses on understanding the fundamentals of Kubernetes
             and how to use it to deploy and manage containers.
           </p>
+
+          <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-award-fill"></i> Attribution & Acknowledgment
+            </h4>
+            <p>
+              <strong
+                >This lab content has been adapted from the excellent free
+                course by DevOps Directive:</strong
+              >
+            </p>
+            <ul>
+              <li>
+                <strong>Original Course Repository:</strong>
+                <a
+                  href="https://github.com/sidpalas/devops-directive-kubernetes-course"
+                  target="_blank"
+                  class="alert-link"
+                >
+                  <i class="bi bi-github"></i>
+                  devops-directive-kubernetes-course
+                </a>
+              </li>
+              <li>
+                <strong>Full Course (Recommended):</strong>
+                <a
+                  href="https://courses.devopsdirective.com/kubernetes-beginner-to-pro/lessons/00-introduction/01-main"
+                  target="_blank"
+                  class="alert-link"
+                >
+                  <i class="bi bi-mortarboard-fill"></i> Kubernetes: Beginner to
+                  Pro
+                </a>
+              </li>
+            </ul>
+            <hr />
+            <p class="mb-0">
+              <strong>Special thanks to Sid Palas and DevOps Directive</strong>
+              for creating and sharing this comprehensive Kubernetes educational
+              content with the community. The full course covers significantly
+              more material than this workshop and is highly recommended for
+              students who want to dive deeper into Kubernetes.
+            </p>
+          </div>
+
           <div class="alert alert-primary" role="alert">
             <h5>
               <i class="bi bi-git"></i> Step 0: Start Fresh -- Clone the
@@ -267,17 +312,900 @@ cd Docker-Workshop/assets/lecture/
 
 # Verify you're in the correct directory
 pwd  # Should show: ~/Docker-Workshop/assets/lecture/
-ls   # Should show: "Deploy-Kubernetes"/ "Kubernetes-Resource-Types"</code></pre>
+ls   # Should show: "devbox.json" "devbox.lock" "Deploy-Kubernetes"/ "Kubernetes-Resource-Types/"</code></pre>
             </div>
           </div>
           <h2><i class="bi bi-bug-fill"></i> Deploying Kubernetes</h2>
-          <h3>1. Deploying Kubernetes</h3>
+          <h3>1. Setting up the environment</h3>
           <p>
-            We will be using KinD (Kubernetes in Docker) to deploy Kubernetes.
-            KinD is a lightweight Kubernetes distribution that runs in Docker
-            containers.
+            We will be using <code>Devbox</code> to manage the software
+            dependencies for the course. <code>Devbox</code> is a tool that
+            allows you to manage software dependencies for a project in a
+            reproducible way. It is a wrapper around <code>Nix</code> that makes
+            it easier to use.
           </p>
-          <p>We will be using KinD to deploy Kubernetes.</p>
+          <p>Install <code>Devbox</code> by running the following command:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code>curl -fsSL https://get.jetify.com/devbox | bash</code></pre>
+          </div>
+          <p>
+            Enter the <code>devbox</code> shell by running the following
+            command:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code>devbox shell</code></pre>
+          </div>
+          <p>
+            <strong>NOTE:</strong> This command will take a while the first time
+            you run it. It will download and install all of the software
+            dependencies for the lesson. You will see a lot of output, but it
+            will eventually finish.
+          </p>
+          <p>
+            You should now be in a shell where all of the software dependencies
+            for the course are installed. You can verify this by running the
+            commands:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code>kubectl version --client</code></pre>
+          </div>
+          <p>You should see something like this:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code>Client Version: v1.30.1
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3</code></pre>
+          </div>
+          <p>
+            You can exit the <code>devbox</code> shell by running the following
+            command:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code>exit</code></pre>
+          </div>
+          <h3>2. What is Kubernetes?</h3>
+          <p>
+            Kubernetes is a powerful container orchestration platform that
+            automates the deployment, scaling, and management of containerized
+            applications. Born from Google's experience running billions of
+            containers in production, it has become the industry standard for
+            managing complex containerized workloads at scale.
+          </p>
+
+          <h4 class="mt-4">
+            <i class="bi bi-clock-history"></i> The Evolution to Kubernetes
+          </h4>
+
+          <div class="alert alert-secondary" role="alert">
+            <h5>
+              <i class="bi bi-server"></i> 2000s: Traditional Deployment Era
+            </h5>
+            <p class="mb-0">
+              Applications ran directly on
+              <strong>bare metal servers</strong> with monolithic architectures.
+              Teams of sysadmins manually managed infrastructure, and scaling
+              was labor-intensive and expensive.
+            </p>
+          </div>
+
+          <div class="alert alert-info" role="alert">
+            <h5><i class="bi bi-cloud"></i> 2010s: Virtualization Era</h5>
+            <p class="mb-0">
+              <strong>Cloud computing and VMs</strong> revolutionized
+              deployment. Tools like Puppet and Chef enabled infrastructure as
+              code, but managing resources at scale remained challenging despite
+              improved tooling.
+            </p>
+          </div>
+
+          <div class="alert alert-success" role="alert">
+            <h5>
+              <i class="bi bi-boxes"></i> 2020s: Container Orchestration Era
+            </h5>
+            <p class="mb-0">
+              <strong>Kubernetes</strong> enables treating clusters of machines
+              as a single resource. It provides standard interfaces for
+              scheduling, health checks, service discovery, and
+              autoscaling—solving the complexity of container management at
+              scale.
+            </p>
+          </div>
+
+          <h4 class="mt-4"><i class="bi bi-stars"></i> Why Kubernetes?</h4>
+          <p>
+            Kubernetes addresses the core challenges of running containers in
+            production by providing:
+          </p>
+
+          <div class="row">
+            <div class="col-md-6">
+              <ul>
+                <li>
+                  <strong>Efficient Scheduling</strong>: Optimally distributes
+                  workloads across nodes
+                </li>
+                <li>
+                  <strong>Service Discovery</strong>: Automatically locates
+                  services within the cluster
+                </li>
+                <li>
+                  <strong>Health Monitoring</strong>: Continuously checks and
+                  maintains application health
+                </li>
+                <li>
+                  <strong>Configuration Management</strong>: Standardizes
+                  application configuration
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul>
+                <li>
+                  <strong>Autoscaling</strong>: Adjusts resources based on
+                  demand
+                </li>
+                <li>
+                  <strong>Persistent Storage</strong>: Manages data beyond
+                  container lifecycles
+                </li>
+                <li>
+                  <strong>Load Balancing</strong>: Distributes traffic across
+                  containers
+                </li>
+                <li>
+                  <strong>Rolling Updates</strong>: Zero-downtime deployments
+                  and rollbacks
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="alert alert-primary mt-3" role="alert">
+            <h5>
+              <i class="bi bi-youtube"></i> Deep Dive: Kubernetes Documentary
+            </h5>
+            <p>
+              For a comprehensive history of Kubernetes development, watch the
+              two-part documentary by Honeypot:
+            </p>
+            <div class="btn-group" role="group">
+              <a
+                href="https://www.youtube.com/watch?v=BE77h7dmoQU"
+                target="_blank"
+                class="btn btn-sm btn-outline-light"
+              >
+                <i class="bi bi-play-circle"></i> Part 1
+              </a>
+              <a
+                href="https://www.youtube.com/watch?v=318elIq37PE"
+                target="_blank"
+                class="btn btn-sm btn-outline-light"
+              >
+                <i class="bi bi-play-circle"></i> Part 2
+              </a>
+            </div>
+          </div>
+          <h3>3. Kubernetes Architecture</h3>
+          <p>
+            Understanding Kubernetes architecture is essential for effectively
+            deploying and managing containerized applications. Kubernetes
+            follows a distributed system design with clear separation between
+            control and data planes, ensuring high availability, scalability,
+            and resilience.
+          </p>
+
+          <h4 class="mt-4"><i class="bi bi-diagram-3"></i> Planes and Nodes</h4>
+          <p>
+            Kubernetes clusters are organized into two primary planes that work
+            together to orchestrate containers:
+          </p>
+
+          <div class="alert alert-warning" role="alert">
+            <h6><i class="bi bi-hdd-rack"></i> <strong>Node</strong></h6>
+            <p class="mb-0">
+              A physical or virtual machine that runs containerized workloads.
+              Multiple nodes are joined together to form a cluster, providing
+              the compute resources for your applications.
+            </p>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="alert alert-info" role="alert">
+                <h6>
+                  <i class="bi bi-cpu"></i> <strong>Control Plane</strong>
+                </h6>
+                <p class="mb-0">
+                  The cluster's brain—manages the overall state, makes
+                  scheduling decisions, and responds to cluster events. Runs on
+                  dedicated control plane nodes.
+                </p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="alert alert-success" role="alert">
+                <h6>
+                  <i class="bi bi-box-seam"></i> <strong>Data Plane</strong>
+                </h6>
+                <p class="mb-0">
+                  Where your applications run—consists of worker nodes that
+                  execute containerized workloads. Managed by the control plane
+                  components.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center my-4">
+            <img
+              src="assets/lecture/img/control-and-data-planes.jpg"
+              class="img-fluid rounded shadow"
+              alt="Kubernetes Control and Data Planes"
+              style="max-width: 80%"
+            />
+          </div>
+
+          <h4 class="mt-4">
+            <i class="bi bi-gear-fill"></i> Kubernetes System Components
+          </h4>
+          <p>
+            Each plane consists of specialized components that work together to
+            provide Kubernetes' powerful orchestration capabilities:
+          </p>
+
+          <div class="row">
+            <div class="col-md-6">
+              <h5 class="text-info">
+                <i class="bi bi-cpu-fill"></i> Control Plane Components
+              </h5>
+              <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item bg-transparent">
+                  <strong><i class="bi bi-database"></i> etcd:</strong>
+                  Distributed key-value store serving as the cluster's source of
+                  truth for all configuration and state.
+                </li>
+                <li class="list-group-item bg-transparent">
+                  <strong><i class="bi bi-server"></i> kube-apiserver:</strong>
+                  The frontend for the control plane, exposing the Kubernetes
+                  API for all communications.
+                </li>
+                <li class="list-group-item bg-transparent">
+                  <strong
+                    ><i class="bi bi-calendar3"></i> kube-scheduler:</strong
+                  >
+                  Intelligently assigns pods to nodes based on resource
+                  requirements and constraints.
+                </li>
+                <li class="list-group-item bg-transparent">
+                  <strong
+                    ><i class="bi bi-sliders"></i>
+                    kube-controller-manager:</strong
+                  >
+                  Runs controllers that regulate cluster state and perform
+                  routine tasks.
+                </li>
+                <li class="list-group-item bg-transparent">
+                  <strong
+                    ><i class="bi bi-cloud-arrow-up"></i>
+                    cloud-controller-manager:</strong
+                  >
+                  Integrates with cloud providers to manage cloud-specific
+                  resources.
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h5 class="text-success">
+                <i class="bi bi-box-seam-fill"></i> Data Plane Components
+              </h5>
+              <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item bg-transparent">
+                  <strong><i class="bi bi-play-circle"></i> kubelet:</strong>
+                  Node agent that ensures containers are running in pods and
+                  manages their lifecycle.
+                </li>
+                <li class="list-group-item bg-transparent">
+                  <strong><i class="bi bi-hdd-network"></i> kube-proxy:</strong>
+                  Network proxy maintaining network rules for pod communication
+                  across the cluster.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="text-center my-4">
+            <img
+              src="assets/lecture/img/k8s-architecture.jpg"
+              class="img-fluid rounded shadow"
+              alt="Kubernetes Architecture Diagram"
+              style="max-width: 90%"
+            />
+          </div>
+
+          <div class="alert alert-secondary mt-3" role="alert">
+            <h5><i class="bi bi-info-circle"></i> Key Takeaway</h5>
+            <p class="mb-0">
+              The separation between control and data planes ensures that even
+              if worker nodes fail, the control plane can reschedule workloads
+              to healthy nodes. This architecture provides the resilience and
+              scalability needed for production containerized applications.
+            </p>
+          </div>
+          <h3>4. Kubernetes in Docker (KinD)</h3>
+          <p>
+            KinD (Kubernetes in Docker) is a tool that allows you to run
+            Kubernetes clusters using Docker containers as nodes. It's designed
+            for local development, CI/CD, and testing scenarios where you need a
+            lightweight, fast-starting Kubernetes environment without the
+            overhead of virtual machines.
+          </p>
+
+          <h4 class="mt-4">
+            <i class="bi bi-star-fill"></i> Why Use KinD for CCDC Training?
+          </h4>
+          <div class="row">
+            <div class="col-md-6">
+              <ul>
+                <li>
+                  <strong>Rapid Deployment</strong>: Cluster creation in under 2
+                  minutes
+                </li>
+                <li>
+                  <strong>Resource Efficient</strong>: Minimal CPU and memory
+                  overhead
+                </li>
+                <li>
+                  <strong>Reproducible</strong>: Consistent environments across
+                  team members
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul>
+                <li>
+                  <strong>Full Kubernetes</strong>: Real K8s API, not a
+                  simulation
+                </li>
+                <li>
+                  <strong>Easy Cleanup</strong>: Complete removal with one
+                  command
+                </li>
+                <li>
+                  <strong>Local Storage</strong>: Persistent volumes using host
+                  directories
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <h4 class="mt-4">
+            <i class="bi bi-gear-wide-connected"></i> Setting Up KinD
+          </h4>
+
+          <h5 class="mt-3">Step 1: Create Cluster Configuration</h5>
+          <p>
+            First, change into the <code>Deploy-Kubernetes/</code> directory and
+            create a KinD configuration file that defines a 3-node cluster (1
+            control-plane + 2 workers) with persistent volume mount points for:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Change into the Deploy-Kubernetes directory
+cd Deploy-Kubernetes
+
+# Create the configuration file
+cat > kind-config.yaml << EOF
+# three node (two workers) cluster config
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+    extraMounts:
+      - hostPath: /tmp/kind-mount-1
+        containerPath: /some/path/in/container
+  - role: worker
+    extraMounts:
+      - hostPath: /tmp/kind-mount-2
+        containerPath: /some/path/in/container
+EOF</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6><i class="bi bi-info-circle"></i> Configuration Breakdown</h6>
+            <ul class="mb-0">
+              <li>
+                <strong>Control-plane node</strong>: Runs Kubernetes API server
+                and control components
+              </li>
+              <li>
+                <strong>Worker nodes</strong>: Run your application pods and
+                workloads
+              </li>
+              <li>
+                <strong>extraMounts</strong>: Enable persistent volume storage
+                using host directories
+              </li>
+            </ul>
+          </div>
+
+          <h5 class="mt-3">Step 2: Create the Kubernetes Cluster</h5>
+          <p>
+            Create your local Kubernetes cluster using the generated
+            configuration:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code>kind create cluster --config kind-config.yaml</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6><i class="bi bi-clock"></i> Expected Output</h6>
+            <p class="mb-0">
+              You should see output similar to: <br />
+              <code class="small">
+                Creating cluster "kind" ...<br />
+                ✓ Ensuring node image (kindest/node:v1.30.0) 🖼<br />
+                ✓ Preparing nodes 📦<br />
+                ✓ Writing configuration 📜<br />
+                ✓ Starting control-plane 🕹️<br />
+                ✓ Installing CNI 🔌<br />
+                ✓ Installing StorageClass 💾<br />
+                Set kubectl context to "kind-kind"
+              </code>
+            </p>
+          </div>
+
+          <h5 class="mt-3">Step 3: Verify Cluster Status</h5>
+          <p>Confirm your cluster is running and accessible:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Check cluster info
+kubectl cluster-info
+
+# View nodes
+kubectl get nodes
+
+# Check system pods
+kubectl get pods -n kube-system
+
+# Check all pods
+kubectl get pods -A</code></pre>
+          </div>
+
+          <h5 class="mt-3">Step 4: Cleanup (When Finished)</h5>
+          <p>When you're done with your cluster, remove it completely:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code>kind delete cluster</code></pre>
+          </div>
+
+          <div class="alert alert-success mt-4" role="alert">
+            <h5><i class="bi bi-check-circle"></i> Ready for Kubernetes!</h5>
+            <p class="mb-0">
+              Your local Kubernetes cluster is now ready for deployment
+              exercises. You can proceed to deploy applications, create
+              services, and explore Kubernetes resource types in a safe, local
+              environment that mirrors production Kubernetes behavior.
+            </p>
+          </div>
+          <h3>5. Kubernetes Resource Types</h3>
+          <p>
+            Kubernetes resource types are the building blocks of your Kubernetes
+            cluster. They are used to create, manage, and delete Kubernetes
+            objects.
+          </p>
+          <h4 class="mt-4">5.1. Namespace</h4>
+          <p>
+            Namespaces provide a mechanism for isolating groups of resources
+            within a single cluster. They're a way to divide cluster resources
+            between multiple users, teams, or projects—like virtual clusters
+            within your physical cluster.
+          </p>
+
+          <div class="alert alert-info" role="alert">
+            <h6><i class="bi bi-lightbulb"></i> Why Use Namespaces?</h6>
+            <ul class="mb-0">
+              <li>
+                <strong>Resource Isolation</strong>: Separate development,
+                staging, and production environments
+              </li>
+              <li>
+                <strong>Team Organization</strong>: Different teams can work
+                independently in their own namespaces
+              </li>
+              <li>
+                <strong>Access Control</strong>: Apply RBAC policies at the
+                namespace level
+              </li>
+              <li>
+                <strong>Resource Quotas</strong>: Limit CPU, memory, and object
+                counts per namespace
+              </li>
+              <li>
+                <strong>Name Scoping</strong>: Resource names only need to be
+                unique within a namespace
+              </li>
+            </ul>
+          </div>
+
+          <h5 class="mt-3">
+            <i class="bi bi-terminal"></i> Hands-On: Creating Namespaces
+          </h5>
+          <p>
+            Let's practice creating namespaces using both imperative and
+            declarative approaches:
+          </p>
+
+          <h6 class="mt-3">
+            <strong>Exercise 1: Create a Namespace Using CLI</strong>
+          </h6>
+          <p>Use the kubectl command to create a namespace directly:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Create a namespace called 'namespace-cli' using kubectl
+kubectl create namespace namespace-cli
+
+# Verify the namespace was created
+kubectl get namespaces | grep namespace-cli</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 2: Create a Namespace Using YAML</strong>
+          </h6>
+          <p>
+            First, navigate to the Namespace directory and examine the provided
+            YAML file:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Navigate to the Namespace directory
+cd ~/Docker-Workshop/assets/lecture/Kubernetes-Resource-Types/Namespace/
+
+# View the Namespace.yaml file
+cat Namespace.yaml</code></pre>
+          </div>
+
+          <p>The file contains:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code>apiVersion: v1
+kind: Namespace
+metadata:
+  name: production</code></pre>
+          </div>
+
+          <p>Now apply this configuration to create the namespace:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Apply the namespace configuration
+kubectl apply -f Namespace.yaml
+
+# Verify both namespaces were created
+kubectl get namespaces | grep -E 'namespace-cli|production'</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6>
+              <i class="bi bi-info-circle"></i> Understanding the YAML Structure
+            </h6>
+            <ul class="mb-0">
+              <li>
+                <code>apiVersion: v1</code> - The Kubernetes API version for
+                namespaces
+              </li>
+              <li>
+                <code>kind: Namespace</code> - Specifies this resource is a
+                Namespace
+              </li>
+              <li>
+                <code>metadata.name</code> - The name of the namespace to create
+              </li>
+            </ul>
+          </div>
+
+          <h5 class="mt-3">
+            <i class="bi bi-trash3"></i> Exercise 3: Clean Up Namespaces
+          </h5>
+          <p>Delete both namespaces to keep your cluster clean:</p>
+
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Delete the namespace created via CLI
+kubectl delete namespace namespace-cli
+
+# Delete the namespace created via YAML file
+kubectl delete -f Namespace.yaml
+
+# Verify the namespaces have been deleted
+kubectl get namespaces
+
+# You should no longer see 'namespace-cli' or 'production' in the list</code></pre>
+          </div>
+
+          <div class="alert alert-warning mt-3" role="alert">
+            <h6><i class="bi bi-exclamation-triangle"></i> Important Notes</h6>
+            <ul class="mb-0">
+              <li>Deleting a namespace will delete ALL resources within it</li>
+              <li>The deletion may take a few seconds to complete</li>
+              <li>
+                Always verify your namespaces are deleted to avoid resource
+                leaks
+              </li>
+            </ul>
+          </div>
+
+          <div class="alert alert-danger mt-3" role="alert">
+            <h6>
+              <i class="bi bi-exclamation-octagon"></i> Important Cleanup Note
+            </h6>
+            <p class="mb-0">
+              <strong>Always clean up test resources!</strong> Deleting a
+              namespace will delete ALL resources within it, including pods,
+              services, deployments, and any other objects. The
+              <code>--ignore-not-found=true</code> flag prevents errors if
+              resources don't exist, making cleanup commands idempotent and safe
+              to run multiple times.
+            </p>
+          </div>
+          <h4 class="mt-4">5.2. Pod</h4>
+          <p>
+            A Pod is the smallest deployable unit in Kubernetes, representing a
+            single instance of a running process in your cluster. Pods contain
+            one or more containers that share storage, network, and a
+            specification for how to run them.
+          </p>
+
+          <div class="alert alert-info" role="alert">
+            <h6><i class="bi bi-lightbulb"></i> Understanding Pods</h6>
+            <ul class="mb-0">
+              <li>
+                <strong>Atomic Unit</strong>: Pods are the basic execution unit
+                - containers in a Pod are always co-located and co-scheduled
+              </li>
+              <li>
+                <strong>Shared Resources</strong>: Containers in a Pod share the
+                same network namespace (IP and ports) and storage volumes
+              </li>
+              <li>
+                <strong>Ephemeral Nature</strong>: Pods are designed to be
+                disposable - use higher-level objects like Deployments for
+                persistent workloads
+              </li>
+              <li>
+                <strong>Best Practice</strong>: Usually one container per Pod
+                unless containers are tightly coupled
+              </li>
+            </ul>
+          </div>
+
+          <h5 class="mt-3">
+            <i class="bi bi-terminal"></i> Hands-On: Working with Pods
+          </h5>
+          <p>
+            Let's explore Pods by creating increasingly sophisticated
+            configurations, starting with a minimal example and progressing to a
+            production-ready Pod specification.
+          </p>
+
+          <h6 class="mt-3">
+            <strong>Exercise 1: Create the Namespace</strong>
+          </h6>
+          <p>First, create a dedicated namespace for our Pod examples:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Navigate to the Pod directory
+cd ~/Docker-Workshop/assets/lecture/Kubernetes-Resource-Types/Pod/
+
+# Create the namespace using the provided YAML
+kubectl apply -f Namespace.yaml
+
+# Set it as the current namespace context
+kubectl config set-context --current --namespace=04--pod</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 2: The Wrong Way (Imperative)</strong>
+          </h6>
+          <p>
+            First, let's see what NOT to do. Creating Pods imperatively is
+            discouraged in production:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># ⚠️ DO NOT DO THIS IN PRODUCTION ⚠️
+# This creates a pod imperatively - difficult to track and reproduce
+kubectl run --image=nginx:1.26.0 -n 04--pod created-the-wrong-way
+
+# Check the pod was created
+kubectl get pods -n 04--pod
+
+# Clean it up
+kubectl delete pod created-the-wrong-way -n 04--pod</code></pre>
+          </div>
+
+          <div class="alert alert-warning mt-3" role="alert">
+            <h6>
+              <i class="bi bi-exclamation-triangle"></i> Why Avoid Imperative
+              Commands?
+            </h6>
+            <ul class="mb-0">
+              <li>No version control or audit trail</li>
+              <li>Difficult to reproduce in other environments</li>
+              <li>Can't review changes before applying</li>
+              <li>Doesn't support GitOps workflows</li>
+            </ul>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 3: Minimal Pod Configuration</strong>
+          </h6>
+          <p>
+            Now let's create a Pod using a minimal declarative YAML
+            configuration:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View the minimal Pod configuration
+cat Pod.nginx-minimal.yaml
+
+# Apply the minimal configuration
+kubectl apply -n 04--pod -f Pod.nginx-minimal.yaml
+
+# Check the pod status
+kubectl get pods -n 04--pod
+kubectl describe pod nginx-minimal -n 04--pod</code></pre>
+          </div>
+
+          <p class="mt-3">Test the minimal Pod with port forwarding:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Forward local port 8080 to the Pod's port 80
+kubectl port-forward -n 04--pod nginx-minimal 8080:80
+
+# In another terminal, test the connection
+curl http://localhost:8080
+
+# Press Ctrl+C to stop port forwarding</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 4: Production-Ready Pod Configuration</strong>
+          </h6>
+          <p>
+            Now let's deploy a better, production-ready Pod with security
+            hardening, resource limits, and health checks:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View the improved Pod configuration
+cat Pod.nginx-better.yaml
+
+# Apply the better configuration
+kubectl apply -n 04--pod -f Pod.nginx-better.yaml
+
+# Check both pods
+kubectl get pods -n 04--pod -o wide
+
+# Compare the configurations
+kubectl get pod nginx-minimal -n 04--pod -o yaml
+kubectl get pod nginx-better -n 04--pod -o yaml</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6>
+              <i class="bi bi-shield-check"></i> Production Pod Best Practices
+            </h6>
+            <p>
+              The <code>nginx-better</code> Pod demonstrates several important
+              practices:
+            </p>
+            <ul class="mb-0">
+              <li>
+                <strong>Security-hardened image</strong>: Uses Chainguard's
+                distroless nginx image for minimal attack surface
+              </li>
+              <li>
+                <strong>Non-root user</strong>: Runs as user 1001 instead of
+                root (UID 0)
+              </li>
+              <li>
+                <strong>Resource limits</strong>: Sets memory and CPU
+                constraints to prevent resource exhaustion
+              </li>
+              <li>
+                <strong>Health checks</strong>: Readiness probe ensures the
+                container is ready to serve traffic
+              </li>
+              <li>
+                <strong>Security context</strong>: Disables privilege escalation
+                and enforces seccomp profile
+              </li>
+              <li>
+                <strong>Explicit port declaration</strong>: Documents which
+                ports the container exposes
+              </li>
+            </ul>
+          </div>
+
+          <p class="mt-3">Test the production-ready Pod:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Port forward to the better pod (note: uses port 8080 internally)
+kubectl port-forward -n 04--pod nginx-better 8080:8080
+
+# Test the connection
+curl http://localhost:8080
+
+# Check resource usage
+kubectl top pod -n 04--pod
+
+# View security context
+kubectl get pod nginx-better -n 04--pod -o jsonpath='{.spec.securityContext}' | jq .</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 5: Examining Pod Details</strong>
+          </h6>
+          <p>Learn to inspect and troubleshoot Pods:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View pod logs
+kubectl logs nginx-minimal -n 04--pod
+kubectl logs nginx-better -n 04--pod
+
+# Execute commands inside a pod
+kubectl exec -it nginx-minimal -n 04--pod -- /bin/bash
+# Try: ls -la, ps aux, whoami, then exit
+
+# Note: The better pod might not have bash due to distroless image
+kubectl exec nginx-better -n 04--pod -- whoami
+
+# View pod events
+kubectl get events -n 04--pod --sort-by='.lastTimestamp'</code></pre>
+          </div>
+
+          <h5 class="mt-3">
+            <i class="bi bi-trash3"></i> Exercise 6: Clean Up
+          </h5>
+          <p>Remove all Pod resources by deleting the namespace:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Delete the namespace (this removes all resources within it)
+kubectl delete -f Namespace.yaml
+
+# Verify cleanup
+kubectl get namespaces | grep 04--pod
+# Should return no results</code></pre>
+          </div>
+
+          <div class="alert alert-danger mt-3" role="alert">
+            <h6>
+              <i class="bi bi-exclamation-octagon"></i> Important Pod
+              Considerations
+            </h6>
+            <ul class="mb-0">
+              <li>
+                <strong>Pods are ephemeral</strong>: Don't use naked Pods for
+                production workloads - use Deployments or StatefulSets
+              </li>
+              <li>
+                <strong>Pod IPs change</strong>: When a Pod is recreated, it
+                gets a new IP - use Services for stable networking
+              </li>
+              <li>
+                <strong>Resource limits matter</strong>: Always set resource
+                requests and limits to ensure cluster stability
+              </li>
+              <li>
+                <strong>Security by default</strong>: Always configure security
+                contexts and use minimal, hardened container images
+              </li>
+            </ul>
+          </div>
         </div>
 
         <!-- Lab Tab -->
