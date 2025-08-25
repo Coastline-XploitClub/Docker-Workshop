@@ -776,13 +776,6 @@ kubectl get pods -n kube-system
 kubectl get pods -A</code></pre>
           </div>
 
-          <h5 class="mt-3">Step 4: Cleanup (When Finished)</h5>
-          <p>When you're done with your cluster, remove it completely:</p>
-          <div class="code-container">
-            <button class="copy-btn">Copy</button>
-            <pre><code>kind delete cluster</code></pre>
-          </div>
-
           <div class="alert alert-success mt-4" role="alert">
             <h5><i class="bi bi-check-circle"></i> Ready for Kubernetes!</h5>
             <p class="mb-0">
@@ -1063,13 +1056,39 @@ kubectl describe pod nginx-minimal -n 04--pod</code></pre>
           <p class="mt-3">Test the minimal Pod with port forwarding:</p>
           <div class="code-container">
             <button class="copy-btn">Copy</button>
-            <pre><code># Forward local port 8080 to the Pod's port 80
+            <pre><code># Forward local port 8080 to the Pod's port 80 (localhost only)
 kubectl port-forward -n 04--pod nginx-minimal 8080:80
 
 # In another terminal, test the connection
 curl http://localhost:8080
 
 # Press Ctrl+C to stop port forwarding</code></pre>
+          </div>
+
+          <div class="alert alert-warning mt-3" role="alert">
+            <h6>
+              <i class="bi bi-network-wired"></i> Accessing from External
+              Machines
+            </h6>
+            <p>
+              The above command only binds to localhost. To access the service
+              from other machines on your network, use the
+              <code>--address</code> flag:
+            </p>
+            <div class="code-container">
+              <button class="copy-btn">Copy</button>
+              <pre><code># Bind to all interfaces - accessible from other machines
+kubectl port-forward --address 0.0.0.0 -n 04--pod nginx-minimal 8080:80
+
+# Now you can access from other machines using your VM's IP:
+# http://172.20.12.161:8080 (replace with your actual VM IP)</code></pre>
+            </div>
+            <p class="mb-0 mt-2">
+              <strong>Security Note:</strong> Only use
+              <code>--address 0.0.0.0</code> in trusted environments as it
+              exposes the service to your entire network. For production, use
+              proper Services and Ingress controllers.
+            </p>
           </div>
 
           <h6 class="mt-3">
@@ -1135,13 +1154,14 @@ kubectl get pod nginx-better -n 04--pod -o yaml</code></pre>
           <div class="code-container">
             <button class="copy-btn">Copy</button>
             <pre><code># Port forward to the better pod (note: uses port 8080 internally)
+# For localhost access only:
 kubectl port-forward -n 04--pod nginx-better 8080:8080
+
+# For external access (from other machines on network):
+kubectl port-forward --address 0.0.0.0 -n 04--pod nginx-better 8080:8080
 
 # Test the connection
 curl http://localhost:8080
-
-# Check resource usage
-kubectl top pod -n 04--pod
 
 # View security context
 kubectl get pod nginx-better -n 04--pod -o jsonpath='{.spec.securityContext}' | jq .</code></pre>
@@ -1203,6 +1223,614 @@ kubectl get namespaces | grep 04--pod
               <li>
                 <strong>Security by default</strong>: Always configure security
                 contexts and use minimal, hardened container images
+              </li>
+            </ul>
+          </div>
+          <h4 class="mt-4">5.3. ReplicaSet</h4>
+          <p>
+            A ReplicaSet is a Kubernetes controller that ensures a specified
+            number of pod replicas are running at any given time. It provides
+            horizontal scaling and self-healing capabilities by automatically
+            replacing failed pods to maintain the desired state, making your
+            applications highly available and resilient to failures.
+          </p>
+
+          <div class="alert alert-info" role="alert">
+            <h6><i class="bi bi-lightbulb"></i> Understanding ReplicaSets</h6>
+            <ul class="mb-0">
+              <li>
+                <strong>Desired State Management</strong>: Continuously ensures
+                the specified number of pod replicas are running
+              </li>
+              <li>
+                <strong>Self-Healing</strong>: Automatically replaces pods that
+                fail, get deleted, or are terminated
+              </li>
+              <li>
+                <strong>Label Selectors</strong>: Uses labels to identify which
+                pods to manage and maintain
+              </li>
+              <li>
+                <strong>Horizontal Scaling</strong>: Easy scale up or down by
+                changing the replica count
+              </li>
+              <li>
+                <strong>Important Note</strong>: While you can create
+                ReplicaSets directly, it's recommended to use Deployments which
+                manage ReplicaSets and provide additional features like rolling
+                updates
+              </li>
+            </ul>
+          </div>
+
+          <h5 class="mt-3">
+            <i class="bi bi-terminal"></i> Hands-On: Working with ReplicaSets
+          </h5>
+          <p>
+            Let's explore ReplicaSets by creating and managing replicated pods,
+            demonstrating scaling operations and self-healing capabilities.
+          </p>
+
+          <h6 class="mt-3">
+            <strong>Exercise 1: Create the Namespace</strong>
+          </h6>
+          <p>
+            First, create a dedicated namespace for our ReplicaSet examples:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Navigate to the ReplicaSet directory
+cd ~/Docker-Workshop/assets/lecture/Kubernetes-Resource-Types/ReplicaSet/
+
+# Create the namespace
+kubectl apply -f Namespace.yaml
+
+# Set it as the current namespace context
+kubectl config set-context --current --namespace=04--replicaset</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 2: Deploy a Minimal ReplicaSet</strong>
+          </h6>
+          <p>Create a basic ReplicaSet that maintains 3 nginx pod replicas:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View the minimal ReplicaSet configuration
+cat ReplicaSet.nginx-minimal.yaml
+
+# Apply the configuration
+kubectl apply -f ReplicaSet.nginx-minimal.yaml
+
+# Watch pods being created (use Ctrl+C to stop watching)
+kubectl get pods -n 04--replicaset -w
+
+# Check the ReplicaSet status
+kubectl get replicaset nginx-minimal -n 04--replicaset
+kubectl describe replicaset nginx-minimal -n 04--replicaset</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6>
+              <i class="bi bi-info-circle"></i> Understanding the Minimal
+              Configuration
+            </h6>
+            <ul class="mb-0">
+              <li>
+                <code>replicas: 3</code> - Maintains exactly 3 pod instances
+              </li>
+              <li>
+                <code>selector.matchLabels</code> - Identifies pods with label
+                <code>app: nginx-minimal</code>
+              </li>
+              <li>
+                <code>template</code> - Pod specification used to create new
+                pods
+              </li>
+              <li>
+                The template labels must match the selector labels for proper
+                management
+              </li>
+            </ul>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 3: Demonstrate Self-Healing</strong>
+          </h6>
+          <p>
+            Test the ReplicaSet's self-healing capability by deleting a pod:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># List all pods managed by the ReplicaSet
+kubectl get pods -n 04--replicaset -l app=nginx-minimal
+
+# Delete one pod (replace pod-name with an actual pod name from the list)
+kubectl delete pod [pod-name] -n 04--replicaset
+
+# Immediately watch pods - you'll see a new one being created
+kubectl get pods -n 04--replicaset -w
+
+# The ReplicaSet maintains the desired count of 3
+kubectl get replicaset nginx-minimal -n 04--replicaset</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 4: Scale the ReplicaSet</strong>
+          </h6>
+          <p>Demonstrate horizontal scaling by changing the replica count:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Scale up to 5 replicas (imperative)
+kubectl scale replicaset nginx-minimal --replicas=5 -n 04--replicaset
+
+# Watch the new pods being created
+kubectl get pods -n 04--replicaset -l app=nginx-minimal
+
+# Scale down to 2 replicas
+kubectl scale replicaset nginx-minimal --replicas=2 -n 04--replicaset
+
+# Watch pods being terminated to maintain desired count
+kubectl get pods -n 04--replicaset -l app=nginx-minimal
+
+# Scale back to 3 using declarative approach (edit the YAML)
+kubectl apply -f ReplicaSet.nginx-minimal.yaml</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 5: Deploy a Production-Ready ReplicaSet</strong>
+          </h6>
+          <p>
+            Now deploy a ReplicaSet with security hardening, resource limits,
+            and health checks:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View the production-ready configuration
+cat ReplicaSet.nginx-better.yaml
+
+# Apply the better configuration
+kubectl apply -f ReplicaSet.nginx-better.yaml
+
+# Check both ReplicaSets
+kubectl get replicasets -n 04--replicaset
+
+# View the pods from the better ReplicaSet
+kubectl get pods -n 04--replicaset -l app=nginx-better</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6>
+              <i class="bi bi-shield-check"></i> Production ReplicaSet Best
+              Practices
+            </h6>
+            <p>
+              The <code>nginx-better</code> ReplicaSet demonstrates important
+              production practices:
+            </p>
+            <ul class="mb-0">
+              <li>
+                <strong>Security hardening</strong>: Chainguard's distroless
+                image with minimal attack surface
+              </li>
+              <li>
+                <strong>Non-root execution</strong>: Runs as user 1001 with
+                runAsNonRoot enforcement
+              </li>
+              <li>
+                <strong>Resource management</strong>: CPU and memory limits
+                prevent resource exhaustion
+              </li>
+              <li>
+                <strong>Health monitoring</strong>: Readiness probes ensure only
+                healthy pods receive traffic
+              </li>
+              <li>
+                <strong>Security context</strong>: Disabled privilege escalation
+                and seccomp profiles
+              </li>
+              <li>
+                <strong>Namespace isolation</strong>: Explicit namespace
+                declaration for proper organization
+              </li>
+            </ul>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 6: Examine ReplicaSet Management</strong>
+          </h6>
+          <p>Explore how ReplicaSets manage their pods:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View events for the ReplicaSet
+kubectl get events -n 04--replicaset --sort-by='.lastTimestamp' | grep ReplicaSet
+
+# Check which pods are owned by each ReplicaSet
+kubectl get pods -n 04--replicaset -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name
+
+# View logs from all pods in a ReplicaSet
+kubectl logs -n 04--replicaset -l app=nginx-better --prefix=true
+
+# Test load balancing with port forwarding (each request may hit different pods)
+kubectl port-forward -n 04--replicaset replicaset/nginx-better 8080:8080</code></pre>
+          </div>
+
+          <h5 class="mt-3">
+            <i class="bi bi-trash3"></i> Exercise 7: Clean Up
+          </h5>
+          <p>Remove all ReplicaSet resources by deleting the namespace:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Delete the namespace (removes all resources within it)
+kubectl delete namespace 04--replicaset
+
+# Verify cleanup
+kubectl get namespaces | grep 04--replicaset
+# Should return no results</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6>
+              <i class="bi bi-exclamation-triangle"></i> Important ReplicaSet
+              Considerations
+            </h6>
+            <ul class="mb-0">
+              <li>
+                <strong>Use Deployments Instead</strong>: ReplicaSets don't
+                support rolling updates - use Deployments which manage
+                ReplicaSets and provide update strategies
+              </li>
+              <li>
+                <strong>Label Selector Immutability</strong>: Once created, you
+                cannot change a ReplicaSet's label selector
+              </li>
+              <li>
+                <strong>Pod Template Changes</strong>: Updating the pod template
+                doesn't affect existing pods - only newly created ones
+              </li>
+              <li>
+                <strong>Orphaned Pods</strong>: Deleting a ReplicaSet with
+                <code>--cascade=orphan</code>
+                leaves pods running but unmanaged
+              </li>
+            </ul>
+          </div>
+
+          <div class="alert alert-danger mt-3" role="alert">
+            <h6>
+              <i class="bi bi-exclamation-octagon"></i> Production Warning
+            </h6>
+            <p class="mb-0">
+              <strong>Don't use ReplicaSets directly in production!</strong>
+              Always use Deployments instead, as they provide crucial features
+              like rolling updates, rollback capabilities, and revision history.
+              ReplicaSets are a lower-level primitive that Deployments build
+              upon. Understanding ReplicaSets helps you debug Deployment issues,
+              but Deployments should be your go-to resource for managing
+              replicated applications.
+            </p>
+          </div>
+          <h4 class="mt-4">5.4. Deployment</h4>
+          <p>
+            A Deployment is the recommended way to manage replicated
+            applications on Kubernetes. It provides declarative updates for Pods
+            and ReplicaSets, handling the complexity of rolling updates,
+            rollbacks, and maintaining desired state. Deployments build upon
+            ReplicaSets by adding crucial production features like update
+            strategies, revision history, and automated rollback capabilities.
+          </p>
+
+          <div class="alert alert-info" role="alert">
+            <h6><i class="bi bi-lightbulb"></i> Understanding Deployments</h6>
+            <ul class="mb-0">
+              <li>
+                <strong>Declarative Updates</strong>: Describe the desired
+                state, and Kubernetes handles the transition
+              </li>
+              <li>
+                <strong>Rolling Updates</strong>: Zero-downtime deployments by
+                gradually replacing old pods with new ones
+              </li>
+              <li>
+                <strong>Rollback Capability</strong>: Quickly revert to previous
+                versions if issues arise
+              </li>
+              <li>
+                <strong>ReplicaSet Management</strong>: Automatically creates
+                and manages ReplicaSets for you
+              </li>
+              <li>
+                <strong>Update Strategies</strong>: Configure how updates are
+                performed (RollingUpdate or Recreate)
+              </li>
+              <li>
+                <strong>Revision History</strong>: Maintains a history of
+                deployments for easy rollback
+              </li>
+            </ul>
+          </div>
+
+          <h5 class="mt-3">
+            <i class="bi bi-terminal"></i> Hands-On: Working with Deployments
+          </h5>
+          <p>
+            Let's explore Deployments by creating applications with rolling
+            updates, demonstrating rollback capabilities, and implementing
+            production best practices.
+          </p>
+
+          <h6 class="mt-3">
+            <strong>Exercise 1: Create the Namespace</strong>
+          </h6>
+          <p>
+            First, create a dedicated namespace for our Deployment examples:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Navigate to the Deployment directory
+cd ~/Docker-Workshop/assets/lecture/Kubernetes-Resource-Types/Deployment/
+
+# Create the namespace
+kubectl apply -f Namespace.yaml
+
+# Set it as the current namespace context
+kubectl config set-context --current --namespace=04--deployment</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 2: Deploy a Minimal Deployment</strong>
+          </h6>
+          <p>Create a basic Deployment that manages 3 nginx pod replicas:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View the minimal Deployment configuration
+cat Deployment.nginx-minimal.yaml
+
+# Apply the configuration
+kubectl apply -f Deployment.nginx-minimal.yaml
+
+# Watch the deployment progress
+kubectl rollout status deployment nginx-minimal -n 04--deployment
+
+# Check the Deployment, ReplicaSet, and Pods created
+kubectl get deployment nginx-minimal -n 04--deployment
+kubectl get replicaset -n 04--deployment
+kubectl get pods -n 04--deployment</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6>
+              <i class="bi bi-info-circle"></i> Understanding Deployment
+              Resources
+            </h6>
+            <p>Notice that the Deployment automatically created:</p>
+            <ul class="mb-0">
+              <li>
+                <strong>ReplicaSet</strong>: Named with a hash suffix (e.g.,
+                nginx-minimal-5d59d67564)
+              </li>
+              <li>
+                <strong>Pods</strong>: Named with the ReplicaSet name plus a
+                random suffix
+              </li>
+              <li>
+                This hierarchy allows Deployments to manage multiple ReplicaSets
+                during updates
+              </li>
+            </ul>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 3: Perform a Rolling Update</strong>
+          </h6>
+          <p>
+            Update the Deployment to use a newer nginx image and observe the
+            rolling update:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Update the image version (this triggers a rolling update)
+kubectl set image deployment/nginx-minimal nginx=nginx:1.26.1 -n 04--deployment
+
+# Watch the rolling update progress
+kubectl rollout status deployment nginx-minimal -n 04--deployment
+
+# View the rollout history
+kubectl rollout history deployment nginx-minimal -n 04--deployment
+
+# Check that we now have a new ReplicaSet
+kubectl get replicaset -n 04--deployment
+
+# Describe the deployment to see the update events
+kubectl describe deployment nginx-minimal -n 04--deployment</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 4: Rollback a Deployment</strong>
+          </h6>
+          <p>Demonstrate how to rollback to a previous version if needed:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View rollout history with more details
+kubectl rollout history deployment nginx-minimal -n 04--deployment
+
+# Rollback to the previous version
+kubectl rollout undo deployment nginx-minimal -n 04--deployment
+
+# Watch the rollback progress
+kubectl rollout status deployment nginx-minimal -n 04--deployment
+
+# Verify the image was rolled back to 1.26.0
+kubectl get deployment nginx-minimal -n 04--deployment -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+# Check ReplicaSets - old one is scaled back up, new one scaled to 0
+kubectl get replicaset -n 04--deployment</code></pre>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 5: Deploy a Production-Ready Deployment</strong>
+          </h6>
+          <p>
+            Now deploy a Deployment with security hardening, resource limits,
+            and proper update strategy:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># View the production-ready configuration
+cat Deployment.nginx-better.yaml
+
+# Apply the better configuration
+kubectl apply -f Deployment.nginx-better.yaml
+
+# Check the deployment status
+kubectl rollout status deployment nginx-better -n 04--deployment
+
+# View both deployments
+kubectl get deployments -n 04--deployment
+
+# Check the pods from the better deployment
+kubectl get pods -n 04--deployment -l app=nginx-better</code></pre>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            <h6>
+              <i class="bi bi-shield-check"></i> Production Deployment Best
+              Practices
+            </h6>
+            <p>
+              The <code>nginx-better</code> Deployment demonstrates important
+              production practices:
+            </p>
+            <ul class="mb-0">
+              <li>
+                <strong>Security-hardened image</strong>: Uses Chainguard's
+                distroless nginx for minimal attack surface
+              </li>
+              <li>
+                <strong>Non-root execution</strong>: Runs as user 1001 with
+                enforced security contexts
+              </li>
+              <li>
+                <strong>Resource limits</strong>: CPU and memory constraints
+                prevent resource exhaustion
+              </li>
+              <li>
+                <strong>Health checks</strong>: Readiness probes ensure only
+                healthy pods receive traffic
+              </li>
+              <li>
+                <strong>Update strategy</strong>: Controlled rolling updates
+                with proper surge and unavailable settings
+              </li>
+              <li>
+                <strong>Labels and annotations</strong>: Proper metadata for
+                organization and tracking
+              </li>
+            </ul>
+          </div>
+
+          <h6 class="mt-3">
+            <strong>Exercise 6: Explore Deployment Management</strong>
+          </h6>
+          <p>Learn advanced Deployment management techniques:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Scale the deployment
+kubectl scale deployment nginx-better --replicas=5 -n 04--deployment
+
+# Watch pods being created
+kubectl get pods -n 04--deployment -l app=nginx-better -w
+
+# Scale back to 3
+kubectl scale deployment nginx-better --replicas=3 -n 04--deployment
+
+# Pause a deployment (useful during troubleshooting)
+kubectl rollout pause deployment nginx-better -n 04--deployment
+
+# Resume the deployment
+kubectl rollout resume deployment nginx-better -n 04--deployment
+
+# View detailed deployment information
+kubectl get deployment nginx-better -n 04--deployment -o yaml | head -50
+
+# Check deployment conditions
+kubectl get deployment nginx-better -n 04--deployment -o jsonpath='{.status.conditions[*].type}'</code></pre>
+          </div>
+
+          <h5 class="mt-3">
+            <i class="bi bi-trash3"></i> Exercise 7: Clean Up
+          </h5>
+          <p>Remove all Deployment resources by deleting the namespace:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Delete the namespace (removes all resources within it)
+kubectl delete namespace 04--deployment
+
+# Verify cleanup
+kubectl get namespaces | grep 04--deployment
+# Should return no results
+
+# Verify no orphaned ReplicaSets or Pods
+kubectl get replicaset --all-namespaces | grep nginx
+kubectl get pods --all-namespaces | grep nginx</code></pre>
+          </div>
+
+          <div class="alert alert-success mt-3" role="alert">
+            <h6>
+              <i class="bi bi-check-circle"></i> Why Deployments Are Essential
+            </h6>
+            <p>
+              Deployments are the workload API you'll use most in Kubernetes
+              because they:
+            </p>
+            <ul class="mb-0">
+              <li>
+                <strong>Simplify Updates</strong>: Rolling updates with zero
+                downtime by default
+              </li>
+              <li>
+                <strong>Enable Quick Recovery</strong>: Instant rollback when
+                issues are detected
+              </li>
+              <li>
+                <strong>Maintain History</strong>: Keep track of all changes for
+                audit and rollback
+              </li>
+              <li>
+                <strong>Handle Complexity</strong>: Manage ReplicaSets and Pods
+                automatically
+              </li>
+              <li>
+                <strong>Production Ready</strong>: Battle-tested for managing
+                stateless applications at scale
+              </li>
+            </ul>
+          </div>
+
+          <div class="alert alert-danger mt-3" role="alert">
+            <h6>
+              <i class="bi bi-exclamation-octagon"></i> Important Deployment
+              Considerations
+            </h6>
+            <ul class="mb-0">
+              <li>
+                <strong>Stateless Only</strong>: Deployments are for stateless
+                apps. Use StatefulSets for stateful applications
+              </li>
+              <li>
+                <strong>Update Strategy Matters</strong>: Default RollingUpdate
+                is usually best, but some apps need Recreate
+              </li>
+              <li>
+                <strong>Resource Limits Required</strong>: Always set resource
+                requests and limits in production
+              </li>
+              <li>
+                <strong>Health Checks Critical</strong>: Readiness and liveness
+                probes prevent bad deployments
+              </li>
+              <li>
+                <strong>Revision Limits</strong>: By default, Kubernetes keeps
+                10 revision history entries
               </li>
             </ul>
           </div>
