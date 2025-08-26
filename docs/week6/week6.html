@@ -1843,15 +1843,252 @@ kubectl get pods --all-namespaces | grep nginx</code></pre>
           role="tabpanel"
           aria-labelledby="lab-tab"
         >
-          <h1><i class="bi bi-terminal-fill"></i> Lab: Deploying Kubernetes</h1>
+          <h1>
+            <i class="bi bi-terminal-fill"></i> Lab: Kubernetes Practice
+            Exercises
+          </h1>
           <p class="lead">
-            Use the tools from the lecture to deploy Kubernetes.
+            Reinforce your Kubernetes knowledge by practicing the exercises from
+            the lecture with different container images.
           </p>
+
+          <div class="alert alert-primary" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-flag-fill"></i> Lab Objective
+            </h4>
+            <p>
+              Practice deploying various containerized services using the
+              Kubernetes resource types covered in the lecture: Namespaces,
+              Pods, ReplicaSets, and Deployments.
+            </p>
+          </div>
+
+          <h2>Lab Instructions</h2>
+
+          <h3>Part 1: Review Lecture Exercises</h3>
+          <p>
+            <strong
+              >First, practice the exact exercises from the lecture to ensure
+              you understand the fundamentals:</strong
+            >
+          </p>
+
+          <div class="alert alert-info" role="alert">
+            <h5>
+              <i class="bi bi-clipboard-check"></i> Complete All Lecture
+              Exercises
+            </h5>
+            <p>Work through each section in order:</p>
+            <ol>
+              <li>
+                <strong>Section 5.1 - Namespace:</strong> Create and delete
+                namespaces using both CLI and YAML methods
+              </li>
+              <li>
+                <strong>Section 5.2 - Pod:</strong> Deploy both nginx-minimal
+                and nginx-better pods, practice port forwarding
+              </li>
+              <li>
+                <strong>Section 5.3 - ReplicaSet:</strong> Create ReplicaSets,
+                test self-healing, practice scaling
+              </li>
+              <li>
+                <strong>Section 5.4 - Deployment:</strong> Deploy applications,
+                perform rolling updates, test rollback
+              </li>
+            </ol>
+            <p class="mb-0">
+              <strong>Important:</strong> Complete each cleanup step before
+              moving to the next section to avoid conflicts.
+            </p>
+          </div>
+
+          <h3>Part 2: Deploy Alternative Services</h3>
+          <p>
+            After mastering the nginx examples from the lecture, practice
+            deploying different containerized services using the same Kubernetes
+            patterns you learned.
+          </p>
+
+          <div class="alert alert-success" role="alert">
+            <h5>
+              <i class="bi bi-lightbulb"></i> Suggested Services to Deploy
+            </h5>
+            <p>
+              Try deploying these single-container services instead of nginx:
+            </p>
+            <ul>
+              <li>
+                <strong>httpd (Apache):</strong> <code>httpd:2.4</code> -
+                Another popular web server (port 80)
+              </li>
+              <li>
+                <strong>redis:</strong> <code>redis:alpine</code> - In-memory
+                data store (port 6379)
+              </li>
+              <li>
+                <strong>postgres:</strong> <code>postgres:15-alpine</code> -
+                PostgreSQL database (port 5432)
+              </li>
+              <li>
+                <strong>mysql:</strong> <code>mysql:8.0</code> - MySQL database
+                (port 3306)
+              </li>
+              <li>
+                <strong>busybox:</strong> <code>busybox:latest</code> -
+                Lightweight debugging container
+              </li>
+              <li>
+                <strong>caddy:</strong> <code>caddy:alpine</code> - Modern web
+                server with automatic HTTPS (port 80/443)
+              </li>
+            </ul>
+          </div>
+
+          <h3>Example: Deploying Apache Instead of Nginx</h3>
+          <p>
+            Here's how to adapt the Pod exercises from Section 5.2 to use
+            Apache:
+          </p>
+
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># Create namespace for Apache examples
+kubectl create namespace apache-lab
+
+# Create a minimal Apache pod
+cat > pod-apache-minimal.yaml << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: apache-minimal
+  namespace: apache-lab
+spec:
+  containers:
+  - name: apache
+    image: httpd:2.4
+    ports:
+    - containerPort: 80
+EOF
+
+# Apply the configuration
+kubectl apply -f pod-apache-minimal.yaml
+
+# Check pod status
+kubectl get pods -n apache-lab
+
+# Test with port forwarding (same pattern as nginx)
+kubectl port-forward -n apache-lab apache-minimal 8080:80
+
+# Access in browser or with curl
+curl http://localhost:8080
+
+# Clean up when done
+kubectl delete namespace apache-lab</code></pre>
+          </div>
 
           <div class="alert alert-warning" role="alert">
             <h5>
-              <i class="bi bi-exclamation-triangle-fill"></i> Target Cluster
+              <i class="bi bi-exclamation-triangle"></i> Practice Guidelines
             </h5>
+            <ul class="mb-0">
+              <li>
+                Start with Pods (Section 5.2 patterns) before moving to
+                Deployments
+              </li>
+              <li>
+                Remember to use namespaces (Section 5.1) to organize your
+                practice work
+              </li>
+              <li>
+                Apply the "better" Pod configurations from the lecture when
+                appropriate (security context, resource limits)
+              </li>
+              <li>
+                For databases like PostgreSQL and MySQL, you may need to set
+                environment variables (e.g., POSTGRES_PASSWORD)
+              </li>
+              <li>
+                Always clean up your resources after each exercise to keep your
+                cluster clean
+              </li>
+            </ul>
+          </div>
+
+          <h3>Practice Challenges</h3>
+
+          <div class="alert alert-info" role="alert">
+            <h5><i class="bi bi-trophy"></i> Challenge Exercises</h5>
+            <p>
+              Using only the concepts from the lecture, try these challenges:
+            </p>
+            <ol>
+              <li>
+                <strong>Multi-Service Namespace:</strong> Create a namespace
+                with both Apache and Redis pods running
+              </li>
+              <li>
+                <strong>ReplicaSet Practice:</strong> Create a ReplicaSet
+                running 3 Apache containers, then manually delete one and watch
+                it recover
+              </li>
+              <li>
+                <strong>Deployment Scaling:</strong> Deploy Caddy using a
+                Deployment, scale it from 1 to 5 replicas, then back to 2
+              </li>
+              <li>
+                <strong>Port Forwarding Practice:</strong> Deploy PostgreSQL and
+                practice accessing it via port-forward on port 5432
+              </li>
+              <li>
+                <strong>Resource Limits:</strong> Apply the "better" Pod pattern
+                from Section 5.2 to a MySQL deployment with appropriate resource
+                limits
+              </li>
+            </ol>
+          </div>
+
+          <h2>Lab Summary</h2>
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">
+              <i class="bi bi-check-circle-fill"></i> Learning Objectives
+            </h4>
+            <p>By completing this lab, you will have:</p>
+            <ul>
+              <li>
+                ✅ Practiced all four Kubernetes resource types from the lecture
+              </li>
+              <li>✅ Deployed multiple different containerized services</li>
+              <li>
+                ✅ Applied namespace organization to keep resources organized
+              </li>
+              <li>
+                ✅ Experienced pod management, scaling, and lifecycle operations
+              </li>
+              <li>✅ Gained confidence working with Kubernetes fundamentals</li>
+            </ul>
+            <p class="mb-0">
+              <strong>Next Steps:</strong> After mastering these fundamentals,
+              you'll be ready to explore more advanced Kubernetes concepts like
+              Services, ConfigMaps, Secrets, and persistent storage in future
+              lessons.
+            </p>
+          </div>
+
+          <h2>Cleanup</h2>
+          <p>Don't forget to clean up all your practice resources:</p>
+          <div class="code-container">
+            <button class="copy-btn">Copy</button>
+            <pre><code># List all namespaces you created
+kubectl get namespaces
+
+# Delete any practice namespaces (replace with your namespace names)
+kubectl delete namespace apache-lab
+kubectl delete namespace redis-lab
+# ... delete any other practice namespaces
+
+# Verify cleanup
+kubectl get all --all-namespaces | grep -E "apache|redis|postgres|mysql|caddy"</code></pre>
           </div>
         </div>
       </div>
